@@ -23,8 +23,10 @@ import { IoIosInformationCircleOutline } from "react-icons/io";
 import { BiCategoryAlt } from "react-icons/bi";
 import { CiShoppingCart } from "react-icons/ci";
 import { MdOutlineContactSupport } from "react-icons/md";
+import toast from "react-hot-toast";
+import { axiosInstance } from "@/app/utils/axiosInstance";
 
-const dropdownContent = {
+const dropdownContentprev= {
 
   Furniture: {
     title: "Furniture Collection ",
@@ -80,7 +82,26 @@ const dropdownContent = {
 };
 
 const Navbar = () => {
-
+  function formatToDropdownContent(apiData) {
+    const dropdownContent = {};
+  
+    apiData.forEach((categoryData) => {
+      const categoryName = categoryData.categories[0]?.categoryName || "Unnamed Category";
+  
+      const columns = categoryData.subCategories.map((subCat) => {
+        const productNames = subCat.products.map((prod) => prod.productName);
+        return [subCat.name, ...productNames]; // First item is subcategory name
+      });
+  
+      dropdownContent[categoryName] = {
+        title: `${categoryName} Collection`,
+        columns,
+      };
+    });
+  
+    return dropdownContent;
+  }
+  
   const [cartItems, setCartItems] = useState([
     {
       id: 1,
@@ -103,7 +124,7 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const [activeDropdown, setActiveDropdown] = useState(null);
-
+const [dropdownContent, setDropdownContent] = useState(dropdownContentprev);
   const handleMouseEnter = (navItem) => {
     setActiveDropdown(navItem);
   };
@@ -120,6 +141,21 @@ const Navbar = () => {
     setIsLoggedIn(!!token);
   }, []);
 
+
+  const fetchDropdownContent = async () => {
+    try {
+      const reponse = await axiosInstance.get("/api/v1/category/get-categories-with-subcategories-and-products")
+     const formattedContent = await formatToDropdownContent(reponse.data.data);
+      setDropdownContent(formattedContent);
+    } catch (error) {
+      console.log("Error fetching dropdown content:", error);
+      toast.error("Failed to fetch dropdown content. Please try again.");
+    }
+  }
+
+  useEffect(() => {
+    fetchDropdownContent();
+  }, []);
   return (
     <>
       <header className="main-navbar">

@@ -1,5 +1,5 @@
 "use client";
-import React from 'react';
+import React, { use, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import './toptrending.css';
@@ -17,22 +17,18 @@ import decorImg from   '@/app/Components/assets/icon9.webp';
 import furnishingImg from   '@/app/Components/assets/icon10.webp';        
 import lampImg from   '@/app/Components/assets/icon11.webp';         
 import saleImg from   '@/app/Components/assets/icon12.webp';         
+import { fetchCategories } from '@/app/redux/slice/categorySllice';
+import { useDispatch, useSelector } from 'react-redux';
 
 const CategoryNav = () => {
-  const categories = [
-    { name: "Sofa Sets", image: sofaImg },
-    { name: "Beds", image: bedImg },
-    { name: "Dining Table Sets", image: diningImg },
-    { name: "Sofa Cum Beds", image: sofaBedImg },
-    { name: "TV Units", image: tvUnitImg },
-    { name: "Book Shelves", image: bookshelfImg },
-    { name: "Coffee Tables", image: coffeeTableImg },
-    { name: "Study Tables", image: studyTableImg },
-    { name: "Home Decor", image: decorImg },
-    { name: "Home Furnishing", image: furnishingImg },
-    { name: "Lamps & Lightings", image: lampImg },
-    { name: "Sale", image: saleImg }
-  ];
+
+  const dispatch = useDispatch();
+
+ const {categories,loading} = useSelector((state) => state.category);
+
+  useEffect(() => {
+    dispatch(fetchCategories());
+  }, [dispatch]);
 
   return (
 <>
@@ -45,24 +41,34 @@ const CategoryNav = () => {
                 <p className='fw-3'>Impressive Collection for Your Dream Home</p>
 
             </div>
-          {categories.map((category, index) => (
-            <div key={index} className="col-4 col-sm-4 col-md-2 mb-3">
-              <Link 
-              href={`/Pages/SubCategory`}
-                // href={`/category/${category.name.toLowerCase().replace(/\s+/g, '-')}`} 
-                className="category-link"
-              >
-                <div className="category-image-container">
-                  <Image 
-                    src={category.image} 
-                    alt={category.name}
-                    className="category-image"
-                  />
+            {
+              !loading ? (
+                categories?.filter((category) => category?.isCollection===true)?.map((category, index) => (
+                  <div key={index} className="col-4 col-sm-4 col-md-2 mb-3">
+                    <Link 
+                    href={`/Pages/SubCategory`}
+                      className="category-link"
+                    >
+                      <div className="category-image-container">
+                        <Image 
+                        width={300}
+                        height={300}
+                          src={category?.categoryImage} 
+                          alt={category?.categoryName}
+                          className="category-image"
+                        />
+                      </div>
+                      <div className="category-name">{category?.categoryName }</div>
+                    </Link>
+                  </div>
+                ))
+              ) : (
+                <div className="col-12 text-center">
+                  <p>Loading...</p>
                 </div>
-                <div className="category-name">{category.name}</div>
-              </Link>
-            </div>
-          ))}
+              )
+            }
+          
         </div>
       </div>
     </section>

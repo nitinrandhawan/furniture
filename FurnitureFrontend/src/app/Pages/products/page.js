@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { FaHeart } from "react-icons/fa";
 import { FaRegHeart } from 'react-icons/fa6';
 import Image from 'next/image';
+import { fetchProducts } from '@/app/redux/slice/productSlice';
+import { useDispatch, useSelector } from 'react-redux';
 
 const Page = () => {
     // State to track the wishlisted product ID
@@ -16,20 +18,14 @@ const Page = () => {
         e.preventDefault(); // Prevent navigation when clicking the heart
         setWishlistedProductId((prevId) => (prevId === productId ? null : productId)); // Toggle wishlist state
     };
+    const dispatch = useDispatch()
 
     // Fetch products from API
-    const [products, setProducts] = useState([]);
+    const {products} = useSelector((state) => state.product)
+
     useEffect(() => {
-        const URL = 'https://api.sddipl.com/api/product/get-all-products-with-pagination';
-        axios.get(URL)
-            .then((response) => {
-                console.log("Products:", response.data?.data);
-                setProducts(response.data?.data || []);
-            })
-            .catch((err) => {
-                console.error("Error fetching products:", err);
-            })
-    }, [])
+        dispatch(fetchProducts())
+     }, [dispatch]);
 
     return (
         <>
@@ -125,10 +121,10 @@ const Page = () => {
                             return (
                                 <div className='col-md-3 col-6' key={index}>
                                     <div className='product-card' style={{ position: 'relative' }}>
-                                        <Link href={`/Pages/products/id`} className='product-link'>
+                                        <Link href={`/Pages/products/${item?._id}`} className='product-link'>
                                             <Image
                                                 className='product-image'
-                                                src={item.images[0]}
+                                                src={item?.images[0]}
                                                 alt='product-image'
                                                 width={300}
                                                 height={300}
@@ -136,9 +132,9 @@ const Page = () => {
                                             <div className='product-details'>
                                                 <h3>{item.productName}</h3>
                                                 <div className='product-price-section'>
-                                                    <p className='final-price'>₹{item.price}</p>
-                                                    <p className='price'><del>₹{item.price}</del></p>
-                                                    <p className='discount'>{item.price}% OFF</p>
+                                                    <p className='final-price'>₹{item?.finalPrice}</p>
+                                                    <p className='price'><del>₹{item?.price}</del></p>
+                                                    <p className='discount'>{item?.discount}% OFF</p>
                                                 </div>
                                             </div>
 

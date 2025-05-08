@@ -1,4 +1,5 @@
-import React from 'react'
+"use client"
+import React, { useEffect } from 'react'
 import image1 from "@/app/Components/assets/icon1.jpg"
 import image2 from "@/app/Components/assets/icon2.webp"
 import image3 from "@/app/Components/assets/icon3.webp"
@@ -10,38 +11,47 @@ import Image from 'next/image'
 import Link from 'next/link'
 import AllProducts from '@/app/Components/all-products/page'
 import './category.css'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchCategories } from '@/app/redux/slice/categorySllice'
 
 const page = () => {
-    const categories = [
-        {
-            productImage: image1,
-            productName: "Sofa Set",
-        },
-        {
-            productImage: image2,
-            productName: "Dining Table",
-        },
-        {
-            productImage: image3,
-            productName: "Chairs",
-        },
-        {
-            productImage: image4,
-            productName: "Cabinets",
-        },
-        {
-            productImage: image5,
-            productName: "Countertops",
-        },
-        {
-            productImage: image6,
-            productName: "Bar Stools",
-        },
-        {
-            productImage: image7,
-            productName: "Storage",
-        },
-    ]
+    // const categories = [
+    //     {
+    //         productImage: image1,
+    //         productName: "Sofa Set",
+    //     },
+    //     {
+    //         productImage: image2,
+    //         productName: "Dining Table",
+    //     },
+    //     {
+    //         productImage: image3,
+    //         productName: "Chairs",
+    //     },
+    //     {
+    //         productImage: image4,
+    //         productName: "Cabinets",
+    //     },
+    //     {
+    //         productImage: image5,
+    //         productName: "Countertops",
+    //     },
+    //     {
+    //         productImage: image6,
+    //         productName: "Bar Stools",
+    //     },
+    //     {
+    //         productImage: image7,
+    //         productName: "Storage",
+    //     },
+    // ]
+    const dispatch = useDispatch()
+  const {categories} =  useSelector((state) => state.category)
+  console.log("categories", categories);
+  
+  useEffect(()=>{
+dispatch(fetchCategories())
+  },[dispatch])
     return (
         <>
           <nav aria-label="breadcrumb" className="pretty-breadcrumb">
@@ -66,18 +76,18 @@ const page = () => {
                         <p className='text-center'>Explore our wide range of kitchen furniture, designed to enhance your cooking and dining experience. From stylish cabinets to comfortable dining sets, we have everything you need to create the perfect kitchen.</p>
                     </div>
                     <div className='row'>
-                        {categories.map((category, index) => (
+                        {categories?.map((category, index) => (
                             <div className='col-lg-2 col-md-3 col-sm-4 col-4' key={index}>
                                 <div className='category-card imageSec '>
                                     <Link href='/Pages/SubCategory'>
                                         <Image
-                                            src={category.productImage}
-                                            alt={category.productName}
+                                            src={category?.categoryImage}
+                                            alt={category?.categoryName}
                                             className='img-fluid'
                                             width={200}
                                             height={200}
                                         />
-                                        <h5 className='category-product-nam'>{category.productName}</h5>
+                                        <h5 className='category-product-nam'>{category?.categoryName}</h5>
                                     </Link>
                                 </div>
                             </div>

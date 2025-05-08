@@ -1,60 +1,101 @@
 "use client";
-import Image from 'next/image';
-import Link from 'next/link';
-import './login.css';
-import React, { useState } from 'react';
-
+import Image from "next/image";
+import Link from "next/link";
+import "./login.css";
+import React, { useState } from "react";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useDispatch } from "react-redux";
+import toast from "react-hot-toast";
+import { loginUser } from "@/app/redux/slice/authSlice";
 const Page = () => {
-  const [loginInput, setLoginInput] = useState('');
-  const [loginError, setLoginError] = useState('');
-
-  const handleLogin = (e) => {
+  const [loginInput, setLoginInput] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [password, setPassword] = useState("");
+  const dispatch = useDispatch();
+  const handleLogin = async(e) => {
     e.preventDefault();
-    if (!loginInput) {
-      setLoginError('Please Enter Mobile Number or Email');
-    } else {
-      setLoginError('');
-      console.log('Login Input : ', loginInput);
+    try {
+    const result =  await dispatch(
+        loginUser({
+          email: loginInput,
+          password: password,
+        })
+      )
+      if(loginUser.fulfilled.match(result)){
+        toast.success("Login successful!");
+        setLoginInput("");
+        setPassword("");
+      }else{
+        toast.error(result.payload.message);
+      }
+    } catch (error) {
+      console.log("login error", error);
+      toast.error("Login failed. Please try again.");
     }
   };
 
   return (
     <>
-      <section className='login-furniture-container'>
-        <div className='login-furniture-wrapper'>
-
+      <section className="login-furniture-container">
+        <div className="login-furniture-wrapper">
           {/* Left Section: Image and Headline */}
-          <div className='login-furniture-left'>
-              <div className='text-center logintext'>
+          <div className="login-furniture-left">
+            <div className="text-center logintext">
               <h1> Log In</h1>
               <p>Welcome Back! Log In to Continue </p>
-              </div>
-            <div className='furniture-overlay-text '>
-              <Image src="/couch.png" alt="banner img" height={500} width={700} />
+            </div>
+            <div className="furniture-overlay-text ">
+              <Image
+                src="/couch.png"
+                alt="banner img"
+                height={500}
+                width={700}
+              />
             </div>
           </div>
 
           {/* Right Section: Login Form */}
-          <div className='login-furniture-right'>
-            <div className='furniture-form-card'>
-              <h2 className='furniture-form-title text-center'> Log In</h2>
+          <div className="login-furniture-right">
+            <div className="furniture-form-card">
+              <h2 className="furniture-form-title text-center"> Log In</h2>
               <form onSubmit={handleLogin}>
-
-
-                <div className='furniture-input-group email-with-button'>
+                <div className="furniture-input-group email-with-button">
                   <input
                     type="text"
-                    placeholder='Enter Mobile Number Or Email Id'
-                    className=' form-input mb-2'
+                    placeholder="Enter Mobile Number Or Email Id"
+                    className=" form-input mb-2"
                     value={loginInput}
                     onChange={(e) => setLoginInput(e.target.value)}
+                    required
                   />
-                  {loginError && <p className='text-danger'>{loginError}</p>}
-                  <button type='submit' className='furniture-submit-btn w-100 login-btn'>Continue</button>
+                  <div style={{ position: "relative" }}>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter Password"
+                      className="form-input mb-2 pr-10 w-full"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                    <div
+                      className="absolute right-3 top-2.5 cursor-pointer text-gray-600"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </div>
+                  </div>
+                  {loginError && <p className="text-danger">{loginError}</p>}
+                  <button
+                    type="submit"
+                    className="furniture-submit-btn w-100 login-btn"
+                  >
+                    Continue
+                  </button>
                   <Link href="/Pages/forgot-password">forgot password</Link>
                 </div>
 
-{/*            */}
+                {/*            */}
               </form>
             </div>
           </div>
@@ -65,10 +106,6 @@ const Page = () => {
 };
 
 export default Page;
-
-
-
-
 
 // 'use client'
 // import React, { useEffect, useState } from 'react'

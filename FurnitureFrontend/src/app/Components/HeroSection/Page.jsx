@@ -1,121 +1,96 @@
-"use client";
-import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
-import './herosection.css';
-import pic1 from '@/app/Components/assets/pic1.jpg';
-import pic2 from '@/app/Components/assets/pic2.jpg';
-import pic3 from '@/app/Components/assets/pic3.jpg';
+'use client';
 
-const HeroSection = () => {
-  const [activeIndex, setActiveIndex] = useState(0);
+import { useEffect, useState } from 'react';
+import './herosection.css'
 
-  const carouselItems = [
+const HeroCarousel = () => {
+  useEffect(() => {
+    import('bootstrap/dist/js/bootstrap.bundle.min.js'); // Bootstrap JS for carousel
+  }, []);
+
+  // Dynamic carousel data (could come from API, or JSON)
+  const slides = [
     {
       id: 1,
-      title: "Modern Sofa Collection",
-      description: "Discover our premium comfort designs",
-      image: pic1,
-      cta: "Shop Now"
+      image: '/banner1.jpg',
+      title: 'New Arrival: Summer Collection',
+      description: 'Explore the latest styles with our summer collection!',
+      cta: 'Shop Now',
+      link: '#shop-now'
     },
     {
       id: 2,
-      title: "Bedroom Essentials",
-      description: "Transform your sleeping experience",
-      image: pic2,
-      cta: "Explore"
+      image: '/banner2.jpg',
+      title: 'Winter Specials',
+      description: 'Get ready for winter with our cozy apparel.',
+      cta: 'Shop Winter',
+      link: '#shop-winter'
     },
     {
       id: 3,
-      title: "Dining Sets",
-      description: "Elegant solutions for your home",
-      image: pic3,
-      cta: "View Collection"
+      image: '/banner1.jpg',
+      title: 'Big Sale on Accessories',
+      description: 'Huge discounts on all accessories!',
+      cta: 'Shop Accessories',
+      link: '#shop-accessories'
     }
   ];
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveIndex((prevIndex) => 
-        prevIndex === carouselItems.length - 1 ? 0 : prevIndex + 1
-      );
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [carouselItems.length]);
-
-  const goToSlide = (index) => {
-    setActiveIndex(index);
-  };
-
   return (
-    <section className="hero-section">
-      <div className="container-fluid g-0">
-        <div className="row g-0">
-          {/* Left Side (60%) - Banner */}
-          <div className="col-lg-8 col-12 hero-banner pe-1 ps-1">
-            <div className="banner-content">
-              <div className="banner-image-container">
-                <Image 
-                  src="/banner1.jpg" 
-                  alt="Furniture Banner" 
-                  fill
-                  className="banner-image"
-                  priority
-                  style={{ objectFit: 'cover' }}
-                />
-              </div>
-              <div className="banner-overlay">
-                <h2>Summer Sale</h2>
-                <h1>UP TO 50 OFF</h1>
-                <p>On selected furniture items</p>
-                <button className="btn btn-light">SHOP DEALS</button>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Side (40%) - Carousel */}
-          <div className="col-lg-4 col-12 hero-carousel hero-divide-mobile">
-            <div id="miniCarousel" className="carousel slide">
-              <div className="carousel-inner">
-                {carouselItems.map((item, index) => (
-                  <div 
-                    key={item.id}
-                    className={`carousel-item ${index === activeIndex ? 'active' : ''}`}
-                  >
-                    <div className="carousel-image-container">
-                      <Image
-                        src={item.image}
-                        alt={item.title}
-                        fill
-                        className="carousel-image"
-                        style={{ objectFit: 'cover' }}
-                      />
-                    </div>
-                    <div className="carousel-caption">
-                      <h3>{item.title}</h3>
-                      <p>{item.description}</p>
-                      <button className="btn btn-outline-light">{item.cta}</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              <div className="carousel-indicators">
-                {carouselItems.map((_, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    className={index === activeIndex ? 'active' : ''}
-                    onClick={() => goToSlide(index)}
-                    aria-label={`Slide ${index + 1}`}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
+    <div id="heroCarousel" className="carousel slide herosectionSec" data-bs-ride="carousel">
+      {/* Indicators */}
+      <div className="carousel-indicators herosectionSec-indicators">
+        {slides.map((slide, index) => (
+          <button
+            key={slide.id}
+            type="button"
+            data-bs-target="#heroCarousel"
+            data-bs-slide-to={index}
+            className={index === 0 ? 'active' : ''}
+            aria-current={index === 0 ? 'true' : 'false'}
+            aria-label={`Slide ${index + 1}`}
+          ></button>
+        ))}
       </div>
-    </section>
+
+      {/* Carousel Inner */}
+      <div className="carousel-inner herosectionSec-inner rounded-4 shadow">
+        {slides.map((slide, index) => (
+          <div
+            key={slide.id}
+            className={`carousel-item ${index === 0 ? 'active' : ''} herosectionSec-item`}
+          >
+            <img src={slide.image} className="d-block w-100 herosectionSec-img" alt={slide.title} />
+            <div className="carousel-caption d-none d-md-block herosectionSec-caption animated fadeInUp">
+              <h5>{slide.title}</h5>
+              <p>{slide.description}</p>
+              <a href={slide.link} className="btn btn-lg herosectionSec-btn">{slide.cta}</a>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Controls */}
+      <button
+        className="carousel-control-prev herosectionSec-control"
+        type="button"
+        data-bs-target="#heroCarousel"
+        data-bs-slide="prev"
+      >
+        <span className="carousel-control-prev-icon" aria-hidden="true" />
+        <span className="visually-hidden">Previous</span>
+      </button>
+      <button
+        className="carousel-control-next herosectionSec-control"
+        type="button"
+        data-bs-target="#heroCarousel"
+        data-bs-slide="next"
+      >
+        <span className="carousel-control-next-icon" aria-hidden="true" />
+        <span className="visually-hidden">Next</span>
+      </button>
+    </div>
   );
 };
 
-export default HeroSection;
+export default HeroCarousel;

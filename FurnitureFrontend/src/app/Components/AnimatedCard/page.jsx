@@ -106,8 +106,9 @@ export default function Products() {
       <div className='mt-3 mb-3'>
         <div className={`container mt-4 ${styles.productContainer}`}>
           <div className="row row-cols-2   row-cols-sm-3 row-cols-md-5 g-4">
-            {productData.map((product) => (
-              <div className="col" key={product.id}>
+            {productData.map((product,index) => (
+          <Link href={`/Pages/products/id`}key={index}  className='product-link'>
+              <div className="col" >
                 <div className={`card AniCardSec h-100 shadow-sm ${styles.productCard}`}>
                   {/* Image Carousel */}
                   <div id={`carousel-${product.id}`} className={`carousel slide ${styles.productCarousel}`} data-bs-ride="carousel" data-bs-interval="2000"
@@ -154,15 +155,12 @@ export default function Products() {
                   <div className='wishlistIconSec'>
                     <RiHeartAddFill
                       className='fs-light'
-                      style={{ color: isLiked ? 'red' : 'inherit' }}
+                      style={{ color: isLiked ? 'red' : 'white' }}
                       onClick={handleClick}
                     />
                   </div>
                   <div className={`card-body product-card-body ${styles.productCardBody}`}>
-                    <div className='d-flex align-items-center m-0'>
-                      <p className={`card-text ${styles.productCardPrice} m-0`}> ₹ {product.price}</p>
-                      <p className='mb-0  text-success'><del className='ms-2 text-center'> &#8377;{product.basePrice}</del></p>
-                    </div>
+                  
                     <h6 className={`card-title m-0  ${styles.productCardTitle}`}>{product.name}</h6>
 
                   </div>
@@ -171,9 +169,14 @@ export default function Products() {
                       <Image src={product.subimage} alt="subimage" height={40} width={40} />
                       <b className={`card-text  text-muted ${styles.productCardDescription}`}>{product.description}</b>
                     </div>
-                    <div className='d-flex'>
-                      <p className='mt-2 text-success'> <del className='ms-2 text-center'> &#8377;{product.basePrice}</del></p>
+                    <div className='d-flex align-items-center m-0'>
+                      <p className={`card-text ${styles.productCardPrice} m-0`}> ₹ {product.price}</p>
+                      <p className='mb-0  text-success'><del className='ms-2 text-center'> &#8377;{product.basePrice}</del></p>
                     </div>
+                    {/* <div className='d-flex'>
+                      <p className='mt-2 text-success'> <del className='ms-2 text-center'> &#8377;{product.basePrice}</del></p>
+                      <p className={`card-text ${styles.productCardPrice} m-0`}> ₹ {product.price}</p>
+                    </div> */}
 
 
                     {/* <Link href={"/Pages/products/id"}> <button className={`btn btn-sm btn-outline-secondary w-100 ${styles.productViewDetailsButton}`}>View Details</button></Link> */}
@@ -181,6 +184,7 @@ export default function Products() {
                   </div>
                 </div>
               </div>
+            </Link>
             ))}
           </div>
         </div>

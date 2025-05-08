@@ -1,6 +1,7 @@
 import Category from "../models/category.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.util.js";
 import SubCategory from "../models/subCategory.model.js";
+import Product from "../models/product.model.js";
 const createCategory = async (req, res) => {
   try {
     const { categoryName, isCollection } = req.body || {};
@@ -126,11 +127,64 @@ const deleteCategory = async (req, res) => {
   }
 };
 
+const getCategoriesWithSubcategoriesAndProducts = async (req, res) => {
+  try {
+   
+    const topCategoryIds = await Product.aggregate([
+      {
+        $group: {
+          _id: "$category",
+          productCount: { $sum: 1 },
+        },
+      },
+      { $sort: { productCount: -1 } },
+      { $limit: 5 },
+    ]);
+
+    const categoryIds = topCategoryIds.map((item) => item._id);
+
+
+    const categories = await Category.find({ _id: { $in: categoryIds } }).select("_id categoryName");
+
+    const result = await Promise.all(
+      categories.map(async (category) => {
+        const subCategories = await SubCategory.find({ Category: category._id });
+  const subCategoriesWithProducts = await Promise.all(
+          subCategories.map(async (sub) => {
+            const products = await Product.find({ subCategory: sub._id }).select("productName _id");
+            return {
+              _id: sub._id,
+              name: sub.subCategoryName,
+              products,
+            };
+          })
+        );
+
+        return {
+          categories,
+          _id: category._id,
+          name: category.name,
+          subCategories: subCategoriesWithProducts,
+        };
+      })
+    );
+
+    return res.status(200).json({
+      message: "Top categories with subcategories and products retrieved successfully",
+      data: result,
+    });
+  } catch (error) {
+    console.log("get category with subcategories and products", error);
+    return res.status(500).json({ message: "Failed to retrieve categories", error: error.message });
+  }
+};
+
 export {
   createCategory,
   getAllCategories,
   getSingleCategory,
   updateCategory,
   deleteCategory,
-  getSubCategoriesByCategory
+  getSubCategoriesByCategory,
+  getCategoriesWithSubcategoriesAndProducts
 };

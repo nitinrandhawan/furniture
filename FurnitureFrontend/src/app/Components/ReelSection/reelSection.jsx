@@ -3,47 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import styles from "./ReelSection.module.css"; // CSS Module
 import Link from "next/link";
+import toast from "react-hot-toast";
+import { axiosInstance } from "@/app/utils/axiosInstance";
 
-const videoData = [
-  {
-    src: "/videos/video1.mp4",
-    price: "$49.99",
-    details: "Elegant Red Dress",
-    description: "Perfect for evening parties.",
-  },
-  {
-    src: "/videos/video2.mp4",
-    price: "$39.99",
-    details: "Casual Summer",
-    description: "Light and comfortable.",
-  },
-  {
-    src: "/videos/video3.mp4",
-    price: "$59.99",
-    details: "Formal Black Gown",
-    description: "Ideal for formal events.",
-  },
-  {
-    src: "/videos/video4.mp4",
-    price: "$29.99",
-    details: "Floral Beach Dress",
-    description: "Great for vacations.",
-  },
-  {
-    src: "/videos/video5.mp4",
-    price: "$45.99",
-    details: "Chic Office Wear",
-    description: "Stylish and professional.",
-  },
-  {
-    src: "/videos/video6.mp4",
-    price: "$34.99",
-    details: "Boho Maxi Dress",
-    description: "Relaxed and trendy.",
-  },
-];
+
 
 export default function ReelSection() {
+  const [videoData, setVideos] = useState([])
   const videoRefs = useRef([]);
   const [expandedIndex, setExpandedIndex] = useState(null);
   const containerRef = useRef(null);
@@ -124,6 +90,22 @@ export default function ReelSection() {
     };
   }, [expandedIndex]);
 
+  const fetchVideos = async () => {
+    try {
+        const response = await axiosInstance.get('/api/v1/video/get-all-videos');
+        if (response.status === 200) {
+            setVideos(response?.data?.videos);
+            console.log(response?.data?.videos);
+            
+        }
+    } catch (error) {
+        toast.error('Error fetching videos');
+        console.error('Error fetching videos:', error);
+    }
+};  
+  useEffect(() => {
+    fetchVideos();
+}, []);
   return (
     <section className="reel-section mt-3" ref={containerRef}>
       <div className="container">
@@ -147,7 +129,7 @@ export default function ReelSection() {
               >
                 <video
                   ref={(el) => (videoRefs.current[index] = el)}
-                  src={item.src}
+                  src={item?.videoUrl}
                   muted
                   loop
                   playsInline
@@ -157,8 +139,8 @@ export default function ReelSection() {
                   className={`position-absolute bottom-0 start-0 w-100 p-2 bg-dark d-flex bg-opacity-75 text-white justify-content-center rounded-bottom ${styles.overlay}`}
                 >
                   <div className="ms-2 d-grid">
-                    <p className="small mb-1">{item.details}</p>
-                    <p className="fw-bold mb-1">{item.price}</p>
+                    <p className="small mb-1">{item?.productId?.productName}</p>
+                    <p className="fw-bold mb-1">₹{item?.productId?.finalPrice}</p>
                     <div className="d-flex align-items-center">
                       <Link href={"/Pages/videosec"}>
                         <button

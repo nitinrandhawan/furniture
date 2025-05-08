@@ -6,14 +6,13 @@ const createSubCategory = async (req, res) => {
     if (!category || !subCategoryName) {
       return res.status(400).json({ message: "All fields are required" });
     }
-    console.log("req body",req.body);
-        
+ 
     const subCategoryImage = req.files?.image[0]?.path;
     if (!subCategoryImage) {
       return res.status(400).json({ message: "Image is required" });
     }
     const subCategoryImageUrl = await uploadOnCloudinary(subCategoryImage);
-    const collectionImage = req.files.collectionImage?.[0]?.path;
+    const collectionImage = req.files.collection?.[0]?.path;
     let collectionImageURL;
     if (collectionImage) {
       collectionImageURL = await uploadOnCloudinary(collectionImage);
@@ -52,7 +51,7 @@ const updateSubCategory=async(req,res)=>{
       }
       let collectionImageURL;
       if(req.files?.collection?.[0]?.path){
-        const collectionImage = req.files.collectionImage?.[0]?.path;
+        const collectionImage = req.files.collection?.[0]?.path;
          collectionImageURL = await uploadOnCloudinary(collectionImage);
       }
       subCategory.subCategoryName = subCategoryName ?? subCategory.subCategoryName;
@@ -94,6 +93,8 @@ const getSingleSubCategory = async (req, res) => {
 const getAllSubCategories = async (req, res) => {
   try {
     const subCategories = await SubCategory.find().populate("Category");
+    console.log("subCategories", subCategories);
+    
     return res.status(200).json({
       message: "Sub categories retrieved successfully",
       data: subCategories,

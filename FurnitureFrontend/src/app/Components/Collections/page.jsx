@@ -1,19 +1,24 @@
+"use client"
 import Image from 'next/image'
-import React from 'react'
+import React, { useEffect } from 'react'
 import pic1 from '@/app/Components/assets/collection/pic1.webp'
 import pic2 from '@/app/Components/assets/collection/pic2.webp'
 import pic3 from '@/app/Components/assets/collection/pic3.webp'
 import pic4 from '@/app/Components/assets/collection/pic4.webp'
 import './collection.css'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchSubCategories } from '@/app/redux/slice/subCategorySlice'
 
 const Page = () => {
-  const collections = [
-    {id: 1, image: pic1, title: "Drawing Room"},
-    {id: 2, image: pic2, title: "Office"},
-    {id: 3, image: pic3, title: "Computer"},
-    {id: 4, image: pic4, title: "Bedroom"}
-  ]
 
+  const dispatch = useDispatch()
+
+const {subCategories} =useSelector((state) => state.subCategory)
+
+  useEffect(() => {
+    dispatch(fetchSubCategories())
+  }, [dispatch])
+  
   return (
     <section className="collection-section">
       <div className="container">
@@ -23,18 +28,18 @@ const Page = () => {
         </div>
         
         <div className='collection-grid'>
-          {collections.map((item) => (
-            <div className='collection-card' key={item.id}>
+          {subCategories?.filter((category) => category?.isCollection===true)?.map((item) => (
+            <div className='collection-card' key={item?._id}>
               <div className='image-wrapper'>
                 <Image 
-                  src={item.image} 
-                  alt={item.title}
+                  src={item?.collectionImage} 
+                  alt={item?.subCategoryName}
                   fill
                   sizes="(max-width: 768px) , (max-width: 1200px) 50vw, 33vw"
                   className='collection-img'
                 />
               </div>
-              <h3 className='collection-title'>{item.title}</h3>
+              <h3 className='collection-title'>{item?.subCategoryName}</h3>
             </div>
           ))}
         </div>

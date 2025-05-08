@@ -238,7 +238,8 @@
 
 @media (max-width: 768px) {
   .card-dropdown {
-    bottom: -120px;
+    display: none !important;
+    /* bottom: -120px; */
   }
 
   .product-card-body{
@@ -277,5 +278,8 @@
   .card-title {
     font-size: small;
   }
+
+   
+
 
 }
