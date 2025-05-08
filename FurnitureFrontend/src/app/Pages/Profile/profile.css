@@ -1,0 +1,76 @@
+.profile-layout {
+  height: 100vh;
+  overflow: hidden;
+  background: linear-gradient(135deg, #000000, #f5f7fa);
+}
+
+.sidebar {
+  background:linear-gradient(135deg, #5b3917, #000000);
+  color: white;
+  min-height: 100%;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+  height: 100vh;
+  overflow-y: scroll;
+}
+
+.sidebar .nav-link {
+  color: #ccc;
+  padding: 12px 15px;
+  border-radius: 8px;
+  margin: 5px 0;
+  transition: background 0.3s, color 0.3s;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.sidebar .nav-link.active,
+.sidebar .nav-link:hover {
+  background-color: #251e2b;
+  color: white;
+}
+
+.content-area {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 0rem;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  height: 100dvh;
+  overflow-y: auto;
+}
+
+.profile-avatar {
+  border: 3px solid white;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+
+.profile-avatar-container {
+  position: relative;
+  display: inline-block;
+}
+
+.profile-avatar-container img {
+  object-fit: cover;
+}
+
+.change-icon {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background-color: #5b3917;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+
+.tableSection{
+  width:500px;
+  border:solid 3px black;
+
+}

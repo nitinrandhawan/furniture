@@ -1,0 +1,360 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import styles from "./ReelSection.module.css"; // CSS Module
+import Link from "next/link";
+
+const videoData = [
+  {
+    src: "/videos/video1.mp4",
+    price: "$49.99",
+    details: "Elegant Red Dress",
+    description: "Perfect for evening parties.",
+  },
+  {
+    src: "/videos/video2.mp4",
+    price: "$39.99",
+    details: "Casual Summer",
+    description: "Light and comfortable.",
+  },
+  {
+    src: "/videos/video3.mp4",
+    price: "$59.99",
+    details: "Formal Black Gown",
+    description: "Ideal for formal events.",
+  },
+  {
+    src: "/videos/video4.mp4",
+    price: "$29.99",
+    details: "Floral Beach Dress",
+    description: "Great for vacations.",
+  },
+  {
+    src: "/videos/video5.mp4",
+    price: "$45.99",
+    details: "Chic Office Wear",
+    description: "Stylish and professional.",
+  },
+  {
+    src: "/videos/video6.mp4",
+    price: "$34.99",
+    details: "Boho Maxi Dress",
+    description: "Relaxed and trendy.",
+  },
+];
+
+export default function ReelSection() {
+  const videoRefs = useRef([]);
+  const [expandedIndex, setExpandedIndex] = useState(null);
+  const containerRef = useRef(null);
+
+  const handleMouseEnter = (index) => {
+    if (expandedIndex !== null) return; // Don't play on hover if a video is expanded
+    videoRefs.current.forEach((video, i) => {
+      if (video) {
+        if (i === index) {
+          video.play();
+        } else {
+          video.pause();
+        }
+      }
+    });
+  };
+
+  const handleMouseLeave = () => {
+    if (expandedIndex !== null) return; // Don't pause on leave if a video is expanded
+    videoRefs.current.forEach((video) => video && video.pause());
+  };
+
+  const toggleExpand = (index) => {
+    if (expandedIndex === index) {
+      // If clicking the already expanded video, collapse it
+      setExpandedIndex(null);
+    } else {
+      // Expand the clicked video
+      setExpandedIndex(index);
+      // Play the video when expanded
+      videoRefs.current[index]?.play();
+      // Pause all other videos
+      videoRefs.current.forEach((video, i) => {
+        if (video && i !== index) video.pause();
+      });
+    }
+  };
+
+  // Close expanded video when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target) &&
+        expandedIndex !== null
+      ) {
+        setExpandedIndex(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [expandedIndex]);
+
+  useEffect(() => {
+    const handleAutoPlay = () => {
+      const isSmallScreen = window.innerWidth <= 768;
+      videoRefs.current.forEach((video) => {
+        if (video) {
+          if (isSmallScreen && expandedIndex === null) {
+            video.play().catch((e) => {
+              console.warn("Mobile autoplay failed:", e);
+            });
+          } else if (!isSmallScreen && expandedIndex === null) {
+            video.pause();
+          }
+        }
+      });
+    };
+
+    handleAutoPlay();
+    window.addEventListener("resize", handleAutoPlay);
+
+    return () => {
+      window.removeEventListener("resize", handleAutoPlay);
+    };
+  }, [expandedIndex]);
+
+  return (
+    <section className="reel-section mt-3" ref={containerRef}>
+      <div className="container">
+        <div className="row g-3">
+          {videoData.map((item, index) => (
+            <div
+              key={index}
+              className={`col-md-2 col-sm-4 col-6 d-flex flex-column align-items-center position-relative`}
+              onClick={() => toggleExpand(index)}
+            >
+              <div
+                onMouseEnter={() => handleMouseEnter(index)}
+                onMouseLeave={handleMouseLeave}
+                className={`${styles.videoContainer} ${
+                  expandedIndex === index ? styles.expanded : ""
+                } ${
+                  expandedIndex !== null && expandedIndex !== index
+                    ? styles.shrunken
+                    : ""
+                }`}
+              >
+                <video
+                  ref={(el) => (videoRefs.current[index] = el)}
+                  src={item.src}
+                  muted
+                  loop
+                  playsInline
+                  className={`${styles.videoElement} rounded shadow-sm`}
+                />
+                <div
+                  className={`position-absolute bottom-0 start-0 w-100 p-2 bg-dark d-flex bg-opacity-75 text-white justify-content-center rounded-bottom ${styles.overlay}`}
+                >
+                  <div className="ms-2 d-grid">
+                    <p className="small mb-1">{item.details}</p>
+                    <p className="fw-bold mb-1">{item.price}</p>
+                    <div className="d-flex align-items-center">
+                      <Link href={"/Pages/videosec"}>
+                        <button
+                          className="btn btn-sm"
+                          style={{
+                            background: "var(--brown)",
+                            color: "white",
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          Add to Cart
+                        </button>
+                      </Link>
+                      <i
+                        className={`fa fa-eye  ms-3 ${styles.cursorPointer}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleExpand(index);
+                        }}
+                      ></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// "use client";
+
+// import { useEffect, useRef, useState } from "react";
+// import styles from "./ReelSection.module.css"; // CSS Module
+// import Link from "next/link";
+
+// const videoData = [
+//   {
+//     src: "/videos/video1.mp4",
+//     price: "$49.99",
+//     details: "Elegant Red Dress",
+//     description: "Perfect for evening parties.",
+//   },
+//   {
+//     src: "/videos/video2.mp4",
+//     price: "$39.99",
+//     details: "Casual Summer",
+//     description: "Light and comfortable.",
+//   },
+//   {
+//     src: "/videos/video3.mp4",
+//     price: "$59.99",
+//     details: "Formal Black Gown",
+//     description: "Ideal for formal events.",
+//   },
+//   {
+//     src: "/videos/video4.mp4",
+//     price: "$29.99",
+//     details: "Floral Beach Dress",
+//     description: "Great for vacations.",
+//   },
+//   {
+//     src: "/videos/video5.mp4",
+//     price: "$45.99",
+//     details: "Chic Office Wear",
+//     description: "Stylish and professional.",
+//   },
+//   {
+//     src: "/videos/video6.mp4",
+//     price: "$34.99",
+//     details: "Boho Maxi Dress",
+//     description: "Relaxed and trendy.",
+//   },
+// ];
+
+// export default function ReelSection() {
+//   const videoRefs = useRef([]);
+//   const [expandedIndex, setExpandedIndex] = useState(null);
+
+//   const handleMouseEnter = (index) => {
+//     // Optional hover effect for non-mobile users to play the video
+//     videoRefs.current.forEach((video, i) => {
+//       if (video) {
+//         if (i === index) {
+//           video.play();
+//         } else {
+//           video.pause();
+//         }
+//       }
+//     });
+//   };
+
+//   const handleMouseLeave = () => {
+//     // Stop video on mouse leave for non-mobile users
+//     videoRefs.current.forEach((video) => video && video.pause());
+//   };
+
+//   const toggleExpand = (index) => {
+//     // Toggle the expanded state for the clicked video
+//     setExpandedIndex((prevIndex) => (prevIndex === index ? null : index));
+//   };
+
+//   useEffect(() => {
+//     // Handle autoplay based on screen size (mobile vs desktop)
+//     const handleAutoPlay = () => {
+//       const isSmallScreen = window.innerWidth <= 768;
+//       videoRefs.current.forEach((video) => {
+//         if (video) {
+//           if (isSmallScreen) {
+//             video.play().catch((e) => {
+//               console.warn("Mobile autoplay failed:", e);
+//             });
+//           } else {
+//             video.pause();
+//           }
+//         }
+//       });
+//     };
+
+//     handleAutoPlay(); // Run on mount
+
+//     window.addEventListener("resize", handleAutoPlay);
+
+//     return () => {
+//       window.removeEventListener("resize", handleAutoPlay);
+//     };
+//   }, []);
+
+//   return (
+//     <section className="reel-section mt-3">
+//       <div className="container">
+//         <div className="row g-3">
+//           {videoData.map((item, index) => (
+//             <div
+//               key={index}
+//               className={`col-md-2 col-sm-4 col-6 d-flex flex-column align-items-center position-relative`}
+//             >
+//               <div
+//                 onMouseEnter={() => handleMouseEnter(index)}
+//                 onMouseLeave={handleMouseLeave}
+//                 className={`${styles.videoContainer} ${expandedIndex === index ? styles.expanded : ""}`}
+//               >
+//                 <video
+//                   ref={(el) => (videoRefs.current[index] = el)}
+//                   src={item.src}
+//                   muted
+//                   loop
+//                   playsInline
+//                   className={`${styles.videoElement} rounded shadow-sm`}
+//                 />
+//                 <div
+//                   className={`position-absolute bottom-0 start-0 w-100 p-2 bg-dark d-flex bg-opacity-75 text-white justify-content-center rounded-bottom ${styles.overlay}`}
+//                 >
+//                   <div className="ms-2 d-grid">
+//                     <p className="small mb-1">{item.details}</p>
+//                     <p className="fw-bold mb-1">{item.price}</p>
+//                     <div className="d-flex align-items-center">
+//                       <Link href={"/Pages/videosec"}>
+//                         <button
+//                           className="btn btn-sm"
+//                           style={{
+//                             background: "var(--brown)",
+//                             color: "white",
+//                           }}
+//                         >
+//                           Add to Cart
+//                         </button>
+//                       </Link>
+//                       <i
+//                         className={`fa fa-eye ms-3 ${styles.cursorPointer}`}
+//                         onClick={() => toggleExpand(index)}
+//                       ></i>
+//                     </div>
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
+//           ))}
+//         </div>
+//       </div>
+//     </section>
+//   );
+// }
