@@ -68,3 +68,18 @@
   }
 
 }
+/* nitin */
+
+.active-btn {
+  background-color: #5b3917 !important;
+  color: #fff !important;
+}
+
+
+.dropdown-item:active,
+.dropdown-item:focus,
+.dropdown-item:hover {
+  background-color: #5b3917 !important;
+  color: #fff !important;
+
+}

@@ -1,11 +1,16 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Head from "next/head";
 import Image from "next/image";
 import "./profile.css";
 import pic1 from "@/app/Components/assets/icon1.jpg";
 import pic2 from "@/app/Components/assets/icon2.webp";
 import { FaUser, FaShoppingBag, FaMapMarkerAlt, FaCog } from "react-icons/fa";
+import toast from "react-hot-toast";
+import { axiosInstance } from "@/app/utils/axiosInstance";
+import { useDispatch, useSelector } from "react-redux";
+import { verifyUser } from "@/app/redux/slice/authSlice";
+import { useRouter } from "next/navigation";
 
 export default function Profile() {
   const [activeTab, setActiveTab] = useState("profile");
@@ -24,6 +29,15 @@ export default function Profile() {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await axiosInstance.get("/api/v1/auth/logout");
+      toast.success("Logged out successfully");
+    } catch (error) {
+      console.log("Error logging out:", error);
+      toast.error("Failed to log out. Please try again.");
+    }
+  };
   const triggerFileInput = () => {
     fileInputRef.current.click();
   };
@@ -57,12 +71,34 @@ export default function Profile() {
         return null;
     }
   };
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const { user,loading } = useSelector((state) => state.auth);
 
+  useEffect(() => {
+    if(loading) return;
+    if (!user?.email) {
+      router.push("/Pages/login");
+    }
+  }, [user]);
+  useEffect(() => {
+    dispatch(verifyUser());
+  }, [dispatch]);
+  
+ 
   return (
     <>
-      <Head>
+    {
+      loading ? (
+        <div>
+          <h1>Loading...</h1>
+        </div>
+      ) :(
+        <>
+         <Head>
         <title>Admin Profile UI</title>
       </Head>
+ 
       <div className="container-fluid profile-layout">
         <div className="row">
           {/* Sidebar */}
@@ -89,28 +125,54 @@ export default function Profile() {
                   />
                 </div>
                 <h6 className="mb-0">Mukesh Mahar</h6>
-                <small>mukeshmahar00@gmail.com</small><br />
+                <small>mukeshmahar00@gmail.com</small>
+                <br />
                 <small>Delhi India</small>
               </div>
 
               <ul className="nav flex-column mt-4">
-                <li className="nav-item" onClick={() => setActiveTab("profile")}>
-                  <a className={`nav-link ${activeTab === "profile" ? "active" : ""}`}>
+                <li
+                  className="nav-item"
+                  onClick={() => setActiveTab("profile")}
+                >
+                  <a
+                    className={`nav-link ${
+                      activeTab === "profile" ? "active" : ""
+                    }`}
+                  >
                     <FaUser /> Profile Info
                   </a>
                 </li>
                 <li className="nav-item" onClick={() => setActiveTab("orders")}>
-                  <a className={`nav-link ${activeTab === "orders" ? "active" : ""}`}>
+                  <a
+                    className={`nav-link ${
+                      activeTab === "orders" ? "active" : ""
+                    }`}
+                  >
                     <FaShoppingBag /> Orders
                   </a>
                 </li>
-                <li className="nav-item" onClick={() => setActiveTab("address")}>
-                  <a className={`nav-link ${activeTab === "address" ? "active" : ""}`}>
+                <li
+                  className="nav-item"
+                  onClick={() => setActiveTab("address")}
+                >
+                  <a
+                    className={`nav-link ${
+                      activeTab === "address" ? "active" : ""
+                    }`}
+                  >
                     <FaMapMarkerAlt /> Address
                   </a>
                 </li>
-                <li className="nav-item" onClick={() => setActiveTab("settings")}>
-                  <a className={`nav-link ${activeTab === "settings" ? "active" : ""}`}>
+                <li
+                  className="nav-item"
+                  onClick={() => setActiveTab("settings")}
+                >
+                  <a
+                    className={`nav-link ${
+                      activeTab === "settings" ? "active" : ""
+                    }`}
+                  >
                     <FaCog /> Settings
                   </a>
                 </li>
@@ -118,7 +180,12 @@ export default function Profile() {
             </div>
 
             <div className="text-center">
-              <button className="btn btn-secondary  w-100 mt-4">Logout</button>
+              <button
+                className="btn btn-secondary  w-100 mt-4"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
             </div>
           </div>
 
@@ -128,6 +195,11 @@ export default function Profile() {
           </div>
         </div>
       </div>
+
+        </>
+      )
+    }
+    
     </>
   );
 }
@@ -135,17 +207,19 @@ export default function Profile() {
 // Profile Info Component
 const ProfileInfo = () => (
   <div className="container">
-   <div className="m-5">
-   <h4 className="text-center text-secondary">Profile Info</h4>
-    <ul className="list-group">
-      <li className="list-group-item">
-        <strong>Email: </strong><span className="text-success">mukeshmahar00@gmail.com</span>
-      </li>
-      <li className="list-group-item">
-        <strong>Phone: </strong><span className="text-warning">7827433944</span>
-      </li>
-    </ul>
-   </div>
+    <div className="m-5">
+      <h4 className="text-center text-secondary">Profile Info</h4>
+      <ul className="list-group">
+        <li className="list-group-item">
+          <strong>Email: </strong>
+          <span className="text-success">mukeshmahar00@gmail.com</span>
+        </li>
+        <li className="list-group-item">
+          <strong>Phone: </strong>
+          <span className="text-warning">7827433944</span>
+        </li>
+      </ul>
+    </div>
   </div>
 );
 
@@ -168,7 +242,9 @@ const Orders = () => (
             </ul>
             <p className="card-text">This is a wider sofa.</p>
             <p className="card-text">
-              <small className="text-body-secondary">Last updated 3 mins ago</small>
+              <small className="text-body-secondary">
+                Last updated 3 mins ago
+              </small>
             </p>
           </div>
         </div>
@@ -191,7 +267,9 @@ const Orders = () => (
             </ul>
             <p className="card-text">This is a double bed with supporting .</p>
             <p className="card-text">
-              <small className="text-body-secondary">Last updated 18 mins ago</small>
+              <small className="text-body-secondary">
+                Last updated 18 mins ago
+              </small>
             </p>
           </div>
         </div>
@@ -201,7 +279,14 @@ const Orders = () => (
 );
 
 // Address Component (UPDATED)
-const Address = ({ address, setAddress, pincode, setPincode, city, setCity }) => {
+const Address = ({
+  address,
+  setAddress,
+  pincode,
+  setPincode,
+  city,
+  setCity,
+}) => {
   const [editMode, setEditMode] = useState(false);
 
   const [tempAddress, setTempAddress] = useState(address);

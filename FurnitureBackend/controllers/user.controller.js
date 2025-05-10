@@ -454,12 +454,12 @@ const verifyAdminLoggedIn = async (req, res) => {
 const verifyLoggedIn = async (req, res) => {
   try {
     const data = req?.user;
-    const user = await User.findById(data.id).select(
+    const user = await User.findById(data._id).select(
       "-password -resetPasswordToken -resetPasswordExpires "
     );
-    return res.status(200).json({ message: "Admin logged in", user });
+    return res.status(200).json({ message: "user logged in", user });
   } catch (error) {
-    console.log("verify admin logged in error", error);
+    console.log("verify logged in error", error);
     res.status(500).json({ message: "verify admin logged in server error" });
   }
 };

@@ -19,10 +19,20 @@ export const loginUser=createAsyncThunk("auth/sign-in",async(userData,thunkAPI)=
     }
 })
 
+export const verifyUser=createAsyncThunk("auth/verify-user",async(thunkAPI)=>{
+    try {
+        const response= await axiosInstance.get("/api/v1/auth/verify-user")
+        return response.data
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error.response.data)
+    }
+})
+
 const authSlice=createSlice({
     name:"auth",
     initialState:{
         user:null,
+        loggedIn:false,
         loading:false,
         error:null,
     },
@@ -53,6 +63,17 @@ const authSlice=createSlice({
             state.user=action.payload?.user
         })
         builder.addCase(loginUser.rejected,(state,action)=>{
+            state.loading=false
+            state.error=action.payload
+        })
+        builder.addCase(verifyUser.pending,(state)=>{
+            state.loading=true
+        })
+        builder.addCase(verifyUser.fulfilled,(state,action)=>{
+            state.loading=false
+            state.user=action.payload?.user
+        })
+        builder.addCase(verifyUser.rejected,(state,action)=>{
             state.loading=false
             state.error=action.payload
         })

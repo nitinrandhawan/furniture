@@ -12,7 +12,7 @@ import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCategories } from "@/app/redux/slice/categorySllice";
 import { fetchMaterials } from "@/app/redux/slice/productSlice";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 const Page = () => {
   const [wishlistedProductId, setWishlistedProductId] = useState(null);
@@ -66,7 +66,8 @@ const Page = () => {
       );
     }
   };
-  const router= useRouter();
+  const router = useRouter();
+  const searchParamsVal = useSearchParams();
   const handleSortChange = (e) => {
     const sortValue = e.target.value;
     router.push(`/Pages/products/search?sortBy=${sortValue}`);
@@ -74,11 +75,10 @@ const Page = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, [query, category, priceMin, priceMax, discountMin, sortBy, material]);
-
+  }, [searchParams.toString()]);
   useEffect(() => {
-    dispatch(fetchCategories());
-    dispatch(fetchMaterials());
+    if (!categories.length) dispatch(fetchCategories());
+  if (!materials.length) dispatch(fetchMaterials());
   }, []);
   return (
     <>
@@ -98,19 +98,59 @@ const Page = () => {
                     Price
                   </button>
                   <ul className="dropdown-menu">
-                    {priceRanges.map((range, index) => (
-                      <li key={index}>
-                        <Link
-                          className="dropdown-item"
-                          href={`/Pages/products/search?priceMin=${range.priceMin}&priceMax=${range.priceMax}`}
-                          key={index}
-                        >
-                          {range.label}
-                        </Link>
-                      </li>
-                    ))}
+                    {priceRanges.map((range, index) => {
+                      const isSelected =
+                        searchParams.get("priceMin") ===
+                          String(range.priceMin) &&
+                        searchParams.get("priceMax") === String(range.priceMax);
+
+                      const updatedParams = {
+                        ...Object.fromEntries(searchParams.entries()),
+                      };
+
+                      if (isSelected) {
+                        delete updatedParams.priceMin;
+                        delete updatedParams.priceMax;
+                      } else {
+                        updatedParams.priceMin = range.priceMin;
+                        updatedParams.priceMax = range.priceMax;
+                      }
+
+                      return (
+                        <li key={index}>
+                          <Link
+                            href={{
+                              pathname: "/Pages/products/search",
+                              query: updatedParams,
+                            }}
+                            className={`dropdown-item ${
+                              isSelected ? "active-btn" : ""
+                            }`}
+                          >
+                            {range.label}
+                          </Link>
+                        </li>
+                      );
+                    })}
+
+                    <li>
+                      <Link
+                        href={{
+                          pathname: "/Pages/products/search",
+                          query: {
+                            ...Object.fromEntries(searchParams.entries()),
+                            priceMin: undefined,
+                            priceMax: undefined, // You can remove the price filter this way
+                          },
+                        }}
+                        className="dropdown-item"
+                      >
+                        Clear Price Filter
+                      </Link>
+                    </li>
                   </ul>
                 </div>
+
                 {/* Category Dropdown */}
                 <div className="dropdown">
                   <button
@@ -120,17 +160,36 @@ const Page = () => {
                     Category
                   </button>
                   <ul className="dropdown-menu">
-                    {categories?.slice(0, 10).map((category, index) => (
-                      <li key={index}>
-                        <Link
-                          className="dropdown-item"
-                          href={`/Pages/products/search?category=${category._id}`}
-                          key={index}
-                        >
-                          {category?.categoryName}
-                        </Link>
-                      </li>
-                    ))}
+                    {categories?.slice(0, 10).map((category, index) => {
+                      const currentParams = Object.fromEntries(
+                        searchParamsVal.entries()
+                      );
+                      const isSelected =
+                        currentParams.category === category._id;
+
+                      const updatedParams = { ...currentParams };
+                      if (isSelected) {
+                        delete updatedParams.category;
+                      } else {
+                        updatedParams.category = category._id;
+                      }
+
+                      return (
+                        <li key={index}>
+                          <Link
+                            className={`dropdown-item ${
+                              isSelected ? "active-btn" : ""
+                            }`}
+                            href={{
+                              pathname: "/Pages/products/search",
+                              query: updatedParams,
+                            }}
+                          >
+                            {category.categoryName} {isSelected && "(Remove)"}
+                          </Link>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
                 {/* Material Dropdown */}
@@ -142,50 +201,39 @@ const Page = () => {
                     Material
                   </button>
                   <ul className="dropdown-menu">
-                    {materials?.slice(0, 10).map((material, index) => (
-                      <li key={index}>
-                        <Link
-                          className="dropdown-item"
-                          href={`/Pages/products/search?material=${material}`}
-                          key={index}
-                        >
-                          {material}
-                        </Link>
-                      </li>
-                    ))}
+                    {materials?.slice(0, 10).map((material, index) => {
+                      const isSelected =
+                        searchParams.get("material") === material;
+
+                      const updatedParams = {
+                        ...Object.fromEntries(searchParams.entries()),
+                      };
+
+                      if (isSelected) {
+                        delete updatedParams.material;
+                      } else {
+                        updatedParams.material = material;
+                      }
+
+                      return (
+                        <li key={index}>
+                          <Link
+                            className={`dropdown-item ${
+                              isSelected ? "active-btn" : ""
+                            }`}
+                            href={{
+                              pathname: "/Pages/products/search",
+                              query: updatedParams,
+                            }}
+                          >
+                            {material}
+                          </Link>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
-                {/* Size Dropdown */}
-                <div className="dropdown">
-                  <button
-                    className="btn btn-light btn-sm dropdown-toggle"
-                    data-bs-toggle="dropdown"
-                  >
-                    Size
-                  </button>
-                  <ul className="dropdown-menu">
-                    <li>
-                      <a className="dropdown-item" href="#">
-                        S
-                      </a>
-                    </li>
-                    <li>
-                      <a className="dropdown-item" href="#">
-                        M
-                      </a>
-                    </li>
-                    <li>
-                      <a className="dropdown-item" href="#">
-                        L
-                      </a>
-                    </li>
-                    <li>
-                      <a className="dropdown-item" href="#">
-                        XL
-                      </a>
-                    </li>
-                  </ul>
-                </div>
+
                 {/* Discount Dropdown */}
                 <div className="dropdown">
                   <button
@@ -195,21 +243,42 @@ const Page = () => {
                     Discount
                   </button>
                   <ul className="dropdown-menu">
-                    <li>
-                      <a className="dropdown-item" href="#">
-                        10% or more
-                      </a>
-                    </li>
-                    <li>
-                      <a className="dropdown-item" href="#">
-                        30% or more
-                      </a>
-                    </li>
-                    <li>
-                      <a className="dropdown-item" href="#">
-                        50% or more
-                      </a>
-                    </li>
+                    {[
+                      { label: "10% or more", value: 10 },
+                      { label: "30% or more", value: 30 },
+                      { label: "50% or more", value: 50 },
+                      { label: "80% or more", value: 80 },
+                    ].map((discount, index) => {
+                      const isSelected =
+                        searchParams.get("discountMin") ===
+                        String(discount.value);
+
+                      const updatedParams = {
+                        ...Object.fromEntries(searchParams.entries()),
+                      };
+
+                      if (isSelected) {
+                        delete updatedParams.discountMin;
+                      } else {
+                        updatedParams.discountMin = discount.value;
+                      }
+
+                      return (
+                        <li key={index}>
+                          <Link
+                            href={{
+                              pathname: "/Pages/products/search",
+                              query: updatedParams,
+                            }}
+                            className={`dropdown-item ${
+                              isSelected ? "active-btn" : ""
+                            }`}
+                          >
+                            {discount.label}
+                          </Link>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               </div>
@@ -217,11 +286,13 @@ const Page = () => {
             <div className="col-md-4">
               <div className="filter-second">
                 <strong className="text-white">Sort By</strong>
-                <select className="form-select form-select-sm w-auto"
-                  onChange={handleSortChange}>
+                <select
+                  className="form-select form-select-sm w-auto"
+                  onChange={handleSortChange}
+                >
                   <option value="lowToHigh">Price: Low to High</option>
-        <option value="highToLow">Price: High to Low</option>
-        <option value="new">Newest First</option>
+                  <option value="highToLow">Price: High to Low</option>
+                  <option value="new">Newest First</option>
                 </select>
               </div>
             </div>

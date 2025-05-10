@@ -5,6 +5,8 @@ import styles from "./ReelSection.module.css"; // CSS Module
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { axiosInstance } from "@/app/utils/axiosInstance";
+import { AddToCartToServer } from "@/app/redux/slice/cartSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 
 
@@ -103,6 +105,43 @@ export default function ReelSection() {
         console.error('Error fetching videos:', error);
     }
 };  
+
+const {user} = useSelector((state) => state.auth);
+const dispatch = useDispatch();
+
+const handleAddToCart=(e,product)=>{
+  e.stopPropagation();
+  let quantity = 1;
+  
+  if (quantity > product.stock) {
+    toast.error("Out of stock");
+    return;
+  }
+
+  if(user?.email){
+    dispatch(AddToCartToServer({productId:product._id,quantity}))
+    toast.success("Product added to cart",{
+      position: "bottom-right",
+    })}
+    else{
+    dispatch(
+      addToCart({
+        productId: product._id,
+        quantity,
+        image: product.images[0],
+        finalPrice: product.finalPrice,
+        name: product.productName,
+        dimensionsCm: product.dimensionsCm,
+        stock: product.stock,
+        discount: product.discount,
+        price: product.price,
+      })
+    );
+    toast.success("Product added to cart", {
+      position: "bottom-right",
+    });
+  }
+}
   useEffect(() => {
     fetchVideos();
 }, []);
@@ -142,18 +181,19 @@ export default function ReelSection() {
                     <p className="small mb-1">{item?.productId?.productName}</p>
                     <p className="fw-bold mb-1">₹{item?.productId?.finalPrice}</p>
                     <div className="d-flex align-items-center">
-                      <Link href={"/Pages/videosec"}>
+                     
                         <button
                           className="btn btn-sm"
                           style={{
                             background: "var(--brown)",
                             color: "white",
                           }}
-                          onClick={(e) => e.stopPropagation()}
+                          onClick={ (e)=>handleAddToCart(e,item?.productId)}
+                         
                         >
                           Add to Cart
                         </button>
-                      </Link>
+                     
                       <i
                         className={`fa fa-eye  ms-3 ${styles.cursorPointer}`}
                         onClick={(e) => {

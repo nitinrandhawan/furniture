@@ -1,66 +1,122 @@
-"use client"
-import React, { useEffect, useState } from 'react'
-import './relatedProduct.css'
-import Link from 'next/link';
+"use client";
+import React, { useEffect, useState } from "react";
+import "./relatedProduct.css";
+import Link from "next/link";
 import { FaHeart } from "react-icons/fa";
-import { FaRegHeart } from 'react-icons/fa6';
-import Image from 'next/image';
+import { FaRegHeart } from "react-icons/fa6";
+import Image from "next/image";
+import { fetchCategories } from "@/app/redux/slice/categorySllice";
+import { fetchMaterials } from "@/app/redux/slice/productSlice";
+import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
 
 const Page = ({ products }) => {
-    // State to track the wishlisted product ID
-    const [wishlistedProductId, setWishlistedProductId] = useState(null);
- 
-    // Function to toggle wishlist for a specific product
-    const toggleWishlist = (e, productId) => {
-        e.preventDefault(); // Prevent navigation when clicking the heart
-        setWishlistedProductId((prevId) => (prevId === productId ? null : productId)); // Toggle wishlist state
-    };
-
-
-    return (
-        <>
-            {/* Product filter section */}
-            <section className='product-filter py-2'>
-                <div className='container'>
-                    <div className='row align-items-center'>
-                        <div className='col-md-8'>
-                            <div className='filter-first'>
-                                <h2 className='fw-bold text-white me-4'>Filter By</h2>
-                                {/* Price Dropdown */}
-                                <div className="dropdown">
-                                    <button className="btn btn-light btn-sm dropdown-toggle" data-bs-toggle="dropdown">
-                                        Price
-                                    </button>
-                                    <ul className="dropdown-menu">
-                                        <li><a className="dropdown-item" href="#">Under $50</a></li>
-                                        <li><a className="dropdown-item" href="#">$50 - $100</a></li>
-                                        <li><a className="dropdown-item" href="#">Above $100</a></li>
-                                    </ul>
-                                </div>
-                                {/* Category Dropdown */}
-                                <div className="dropdown">
-                                    <button className="btn btn-light btn-sm dropdown-toggle" data-bs-toggle="dropdown">
-                                        Category
-                                    </button>
-                                    <ul className="dropdown-menu">
-                                        <li><a className="dropdown-item" href="#">Clothing</a></li>
-                                        <li><a className="dropdown-item" href="#">Accessories</a></li>
-                                        <li><a className="dropdown-item" href="#">Shoes</a></li>
-                                    </ul>
-                                </div>
-                                {/* Material Dropdown */}
-                                <div className="dropdown">
-                                    <button className="btn btn-light btn-sm dropdown-toggle" data-bs-toggle="dropdown">
-                                        Material
-                                    </button>
-                                    <ul className="dropdown-menu">
-                                        <li><a className="dropdown-item" href="#">Cotton</a></li>
-                                        <li><a className="dropdown-item" href="#">Leather</a></li>
-                                        <li><a className="dropdown-item" href="#">Synthetic</a></li>
-                                    </ul>
-                                </div>
-                                {/* Size Dropdown */}
-                                <div className="dropdown">
+  const [wishlistedProductId, setWishlistedProductId] = useState(null);
+  const router = useRouter();
+  const priceRanges = [
+    { label: "Under ₹500", priceMin: 0, priceMax: 500 },
+    { label: "₹500 - ₹1,000", priceMin: 500, priceMax: 1000 },
+    { label: "₹1,000 - ₹2,000", priceMin: 1000, priceMax: 2000 },
+    { label: "₹2,000 - ₹10,000", priceMin: 2000, priceMax: 10000 },
+    { label: "₹10,000 - ₹30,000", priceMin: 10000, priceMax: 30000 },
+    { label: "Above ₹30,000", priceMin: 30000, priceMax: Infinity },
+  ];
+    const dispatch = useDispatch();
+    const categories = useSelector((state) => state.category.categories);
+    const materials = useSelector((state) => state.product.materials);
+  const handleSortChange = (e) => {
+    const sortValue = e.target.value;
+    router.push(`/Pages/products/search?sortBy=${sortValue}`);
+  };
+  const toggleWishlist = (e, productId) => {
+    e.preventDefault(); 
+    setWishlistedProductId((prevId) =>
+      prevId === productId ? null : productId
+    ); // Toggle wishlist state
+  };
+  useEffect(() => {
+    dispatch(fetchCategories());
+    dispatch(fetchMaterials());
+  }, []);
+  return (
+    <>
+      {/* Product filter section */}
+      <section className="product-filter py-2">
+        <div className="container">
+          <div className="row align-items-center">
+            <div className="col-md-8">
+              <div className="filter-first">
+                <h2 className="fw-bold text-white me-4">Filter By</h2>
+                {/* Price Dropdown */}
+                <div className="dropdown">
+                  <button
+                    className="btn btn-light btn-sm dropdown-toggle"
+                    data-bs-toggle="dropdown"
+                  >
+                    Price
+                  </button>
+                  <ul className="dropdown-menu">
+                  {
+                    priceRanges?.map((priceRange, index) => {
+                      return (
+                        <li key={index}>
+                          <Link
+                            className="dropdown-item"
+                            href={`/Pages/products/search?priceMin=${priceRange.priceMin}&priceMax=${priceRange.priceMax}`}
+                          >
+                            {priceRange.label}
+                          </Link>
+                        </li>
+                      );
+                    })
+                  }
+                  </ul>
+                </div>
+                {/* Category Dropdown */}
+                <div className="dropdown">
+                  <button
+                    className="btn btn-light btn-sm dropdown-toggle"
+                    data-bs-toggle="dropdown"
+                  >
+                    Category
+                  </button>
+                  <ul className="dropdown-menu">
+                  {  categories?.slice(0, 10)?.map((category, index) => {
+                            return (
+                                <li key={index}>
+                                    <Link className="dropdown-item" href={`/Pages/products/search?category=${category?._id}`}>
+                                        {category?.categoryName}
+                                    </Link>
+                                </li>
+                            )
+                        })
+                    }
+                  </ul>
+                </div>
+                {/* Material Dropdown */}
+                <div className="dropdown">
+                  <button
+                    className="btn btn-light btn-sm dropdown-toggle"
+                    data-bs-toggle="dropdown"
+                  >
+                    Material
+                  </button>
+                  <ul className="dropdown-menu">
+                    {  materials?.slice(0, 10)?.map((material, index) => {
+                            return (
+                                <li key={index}>
+                                    <Link className="dropdown-item" href={`/Pages/products/search?material=${material}`}>
+                                        {material}
+                                    </Link>
+                                </li>
+                            )
+                        })
+                    }
+                  
+                  </ul>
+                </div>
+                {/* Size Dropdown */}
+                {/* <div className="dropdown">
                                     <button className="btn btn-light btn-sm dropdown-toggle" data-bs-toggle="dropdown">
                                         Size
                                     </button>
@@ -70,89 +126,122 @@ const Page = ({ products }) => {
                                         <li><a className="dropdown-item" href="#">L</a></li>
                                         <li><a className="dropdown-item" href="#">XL</a></li>
                                     </ul>
-                                </div>
-                                {/* Discount Dropdown */}
-                                <div className="dropdown">
-                                    <button className="btn btn-light btn-sm dropdown-toggle" data-bs-toggle="dropdown">
-                                        Discount
-                                    </button>
-                                    <ul className="dropdown-menu">
-                                        <li><a className="dropdown-item" href="#">10% or more</a></li>
-                                        <li><a className="dropdown-item" href="#">30% or more</a></li>
-                                        <li><a className="dropdown-item" href="#">50% or more</a></li>
-                                    </ul>
-                                </div>
-                            </div>
+                                </div> */}
+                {/* Discount Dropdown */}
+                <div className="dropdown">
+                  <button
+                    className="btn btn-light btn-sm dropdown-toggle"
+                    data-bs-toggle="dropdown"
+                  >
+                    Discount
+                  </button>
+                  <ul className="dropdown-menu">
+                    <li>
+                      <Link
+                        href="/Pages/products/search?discountMin=10"
+                        className="dropdown-item"
+                      >
+                        10% or more
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/Pages/products/search?discountMin=30"
+                        className="dropdown-item"
+                      >
+                        30% or more
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/Pages/products/search?discountMin=50"
+                        className="dropdown-item"
+                      >
+                        50% or more
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-4">
+              <div className="filter-second">
+                <strong className="text-white">Sort By</strong>
+                <select
+                  className="form-select form-select-sm w-auto"
+                  onChange={handleSortChange}
+                >
+                  <option value="lowToHigh">Price: Low to High</option>
+                  <option value="highToLow">Price: High to Low</option>
+                  <option value="new">Newest First</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Product list */}
+      <section className="product-list">
+        <div className="product-list-header">
+          <h2>Products</h2>
+          <p>Explore our wide range of products</p>
+        </div>
+        <div className="container">
+          <div className="row">
+            {products?.map((item, index) => {
+              return (
+                <div className="col-md-3 col-6" key={index}>
+                  <div
+                    className="product-card"
+                    style={{ position: "relative" }}
+                  >
+                    <Link
+                      href={`/Pages/products/${item._id}`}
+                      className="product-link"
+                    >
+                      <Image
+                        className="product-image"
+                        src={item?.images[0] || "/images/placeholder.png"}
+                        alt="product-image"
+                        width={300}
+                        height={300}
+                      />
+                      <div className="product-details">
+                        <h3>{item.productName}</h3>
+                        <div className="product-price-section">
+                          <p className="final-price">₹{item.price}</p>
+                          <p className="price">
+                            <del>₹{item.price}</del>
+                          </p>
+                          <p className="discount">{item.price}% OFF</p>
                         </div>
-                        <div className='col-md-4'>
-                            <div className='filter-second'>
-                                <strong className="text-white">Sort By</strong>
-                                <select className='form-select form-select-sm w-auto'>
-                                    <option value="relevance">Relevance</option>
-                                    <option value="price_low_high">Price: Low to High</option>
-                                    <option value="price_high_low">Price: High to Low</option>
-                                    <option value="newest">Newest First</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
+                      </div>
+
+                      {/* Wishlist Button */}
+                      <button
+                        className="wishlist-btn"
+                        onClick={(e) => toggleWishlist(e, item.id)}
+                        aria-label="Add to Wishlist"
+                      >
+                        {wishlistedProductId === item.id ? (
+                          <FaHeart className="wishlist-icon red" />
+                        ) : (
+                          <FaRegHeart className="wishlist-icon" />
+                        )}
+                      </button>
+                    </Link>
+                  </div>
                 </div>
-            </section>
+              );
+            })}
+          </div>
+        </div>
+      </section>
 
-            {/* Product list */}
-            <section className='product-list'>
-                <div className='product-list-header'>
-                    <h2>Products</h2>
-                    <p>Explore our wide range of products</p>
-                </div>
-                <div className='container'>
-                    <div className='row'>
-                        {products?.map((item, index) => {
-                            return (
-                                <div className='col-md-3 col-6' key={index}>
-                                    <div className='product-card' style={{ position: 'relative' }}>
-                                        <Link href={`/Pages/products/${item._id}`} className='product-link'>
-                                            <Image
-                                                className='product-image'
-                                                src={item?.images[0] || '/images/placeholder.png'}
-                                                alt='product-image'
-                                                width={300}
-                                                height={300}
-                                            />
-                                            <div className='product-details'>
-                                                <h3>{item.productName}</h3>
-                                                <div className='product-price-section'>
-                                                    <p className='final-price'>₹{item.price}</p>
-                                                    <p className='price'><del>₹{item.price}</del></p>
-                                                    <p className='discount'>{item.price}% OFF</p>
-                                                </div>
-                                            </div>
-
-                                            {/* Wishlist Button */}
-                                            <button
-                                                className='wishlist-btn'
-                                                onClick={(e) => toggleWishlist(e, item.id)}
-                                                aria-label='Add to Wishlist'
-                                            >
-                                                {wishlistedProductId === item.id ? (
-                                                    <FaHeart className='wishlist-icon red' />
-                                                ) : (
-                                                    <FaRegHeart className='wishlist-icon' />
-                                                )}
-                                            </button>
-                                        </Link>
-                                    </div>
-                                </div>
-                            )
-                        })}
-                    </div>
-                </div>
-            </section>
-
-            {/* Wishlist styles */}
-
-        </>
-    )
-}
+      {/* Wishlist styles */}
+    </>
+  );
+};
 
 export default Page;

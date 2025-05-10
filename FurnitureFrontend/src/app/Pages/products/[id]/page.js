@@ -1,5 +1,4 @@
 "use client";
-import axios from "axios";
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 import Slider from "react-slick";
@@ -15,6 +14,8 @@ import "slick-carousel/slick/slick-theme.css";
 import { useParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { axiosInstance } from "@/app/utils/axiosInstance";
+import { useDispatch, useSelector } from "react-redux";
+import { addToCart, AddToCartToServer } from "@/app/redux/slice/cartSlice";
 
 const ImageCarousel = ({ product }) => {
   const mainSlider = useRef(null);
@@ -107,7 +108,7 @@ const Page = () => {
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [faqData, setFaqData] = useState([]);
   const { id } = useParams();
-
+  const dispatch = useDispatch();
   const fetchProductDetails = async () => {
     try {
       const response = await axiosInstance.get(
@@ -156,6 +157,40 @@ const Page = () => {
       toast.error("Failed to fetch product details. Please try again.");
     }
   };
+  const { user } = useSelector((state) => state.auth);
+  const handleAddToCart = () => {
+    let quantity = 1;
+  
+    if (quantity > product.stock) {
+      toast.error("Out of stock");
+      return;
+    }
+
+    if(user?.email){
+      dispatch(AddToCartToServer({productId:product._id,quantity}))
+      toast.success("Product added to cart",{
+        position: "bottom-right",
+      })}
+      else{
+      dispatch(
+        addToCart({
+          productId: product._id,
+          quantity,
+          image: product.images[0],
+          finalPrice: product.finalPrice,
+          name: product.productName,
+          dimensionsCm: product.dimensionsCm,
+          stock: product.stock,
+          discount: product.discount,
+          price: product.price,
+        })
+      );
+      toast.success("Product added to cart", {
+        position: "bottom-right",
+      });
+    }
+  };
+
   useEffect(() => {
     fetchProductDetails();
   }, [id]);
@@ -203,7 +238,10 @@ const Page = () => {
                   <h2 className="details-heading Producttitle">
                     {product?.productName}
                   </h2>
-                  <p className="detail-description">{product?.description}</p>
+                  <div
+                    className="detail-description"
+                    dangerouslySetInnerHTML={{ __html: product?.description }}
+                  ></div>
                   <hr />
                   <div className="price-section">
                     <p className="final-price"> ₹{product?.finalPrice}</p>
@@ -245,13 +283,14 @@ const Page = () => {
                       </li>
                     </ul>
                     <div className="product-details-cart-button">
-                      <Link href="/Pages/addtocart" className="add-to-cart">
+                      {" "}
+                      <button
+                        className=" cartbtn "
+                        onClick={ handleAddToCart}
+                      >
                         {" "}
-                        <button className=" cartbtn ">
-                          {" "}
-                          <FaCartArrowDown className="fs-3" /> ADD TO CART
-                        </button>
-                      </Link>
+                        <FaCartArrowDown className="fs-3" /> ADD TO CART
+                      </button>
                       <button className="buy-now">
                         {" "}
                         <MdElectricBolt className="fs-3" /> Buy Now
