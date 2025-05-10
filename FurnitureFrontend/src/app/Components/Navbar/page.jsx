@@ -287,7 +287,7 @@ const [dropdownContent, setDropdownContent] = useState(dropdownContentprev);
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" href="/Pages/Category">
+                <Link className="nav-link" href="/Pages/All-category">
                   All Category
                 </Link>
               </li>

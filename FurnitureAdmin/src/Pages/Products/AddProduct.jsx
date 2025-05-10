@@ -24,7 +24,7 @@ const AddProduct = () => {
     finalPrice: 0,
     brand: "",
     description: "",
-    Assembly: "",
+    isFeatured: "",
     material: "",
     weight: "",
     sku: "",
@@ -200,17 +200,7 @@ const AddProduct = () => {
               required
             />
           </div>
-          <div className="col-md-3">
-            <label className="form-label">Assembly*</label>
-            <input
-              type="text"
-              name="Assembly"
-              className="form-control"
-              value={formData.Assembly}
-              onChange={handleChange}
-              required
-            />
-          </div>
+          
           <div className="col-md-3">
             <label className="form-label">weight*</label>
             <input
@@ -453,6 +443,20 @@ const AddProduct = () => {
                 onChange={handleChange}
                 required
               />
+            </div>
+          </div>
+          <div className="col-12" style={{ marginTop: "20px" }}>
+            <div className="form-check">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="status"
+                checked={formData.isFeatured}
+                onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
+              />
+              <label className="form-check-label" htmlFor="status">
+                Featured Product
+              </label>
             </div>
           </div>
           <div className="col-md-12 mt-4 text-center">

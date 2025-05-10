@@ -19,6 +19,7 @@ import lampImg from   '@/app/Components/assets/icon11.webp';
 import saleImg from   '@/app/Components/assets/icon12.webp';         
 import { fetchCategories } from '@/app/redux/slice/categorySllice';
 import { useDispatch, useSelector } from 'react-redux';
+import { generateSlug } from '@/app/utils/generate-slug';
 
 const CategoryNav = () => {
 
@@ -46,7 +47,7 @@ const CategoryNav = () => {
                 categories?.filter((category) => category?.isCollection===true)?.map((category, index) => (
                   <div key={index} className="col-4 col-sm-4 col-md-2 mb-3">
                     <Link 
-                    href={`/Pages/SubCategory`}
+                    href={`/Pages/category/${generateSlug(category?.categoryName, category?._id)}`}
                       className="category-link"
                     >
                       <div className="category-image-container">

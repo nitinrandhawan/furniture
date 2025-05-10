@@ -1,15 +1,12 @@
 "use client"
 import React, { useEffect, useState } from 'react'
-import './allproduct.css'
-import axios from 'axios';
+import './relatedProduct.css'
 import Link from 'next/link';
 import { FaHeart } from "react-icons/fa";
 import { FaRegHeart } from 'react-icons/fa6';
 import Image from 'next/image';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchProducts } from '@/app/redux/slice/productSlice';
 
-const Page = () => {
+const Page = ({ products }) => {
     // State to track the wishlisted product ID
     const [wishlistedProductId, setWishlistedProductId] = useState(null);
  
@@ -19,12 +16,7 @@ const Page = () => {
         setWishlistedProductId((prevId) => (prevId === productId ? null : productId)); // Toggle wishlist state
     };
 
- 
-const dispatch = useDispatch();
-const products = useSelector((state) => state.product.products);
-    useEffect(() => {
-        dispatch(fetchProducts())
-    },[])
+
     return (
         <>
             {/* Product filter section */}
@@ -119,7 +111,7 @@ const products = useSelector((state) => state.product.products);
                             return (
                                 <div className='col-md-3 col-6' key={index}>
                                     <div className='product-card' style={{ position: 'relative' }}>
-                                        <Link href={`/Pages/products/id`} className='product-link'>
+                                        <Link href={`/Pages/products/${item._id}`} className='product-link'>
                                             <Image
                                                 className='product-image'
                                                 src={item?.images[0] || '/images/placeholder.png'}

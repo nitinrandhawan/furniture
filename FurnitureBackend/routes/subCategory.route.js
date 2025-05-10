@@ -1,6 +1,6 @@
 import { Router } from "express";
 import {multerErrorHandler} from "../middlewares/multerErrorHandling.middleware.js";
-import { getAllSubCategories, getSingleSubCategory, createSubCategory, updateSubCategory, deleteSubCategory } from "../controllers/subCategory.controller.js";
+import { getAllSubCategories, getSingleSubCategory, createSubCategory, updateSubCategory, deleteSubCategory, getProductsBySubCategory } from "../controllers/subCategory.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyAdmin } from "../middlewares/adminVerification.middleware.js";
 const router = Router();
@@ -34,5 +34,5 @@ router.put(
   updateSubCategory
 );
 router.delete("/delete-sub-category/:id",verifyAdmin, deleteSubCategory);
-
+router.get("/get-products-by-sub-category/:id", getProductsBySubCategory);
 export default router;

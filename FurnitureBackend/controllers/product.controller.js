@@ -10,7 +10,6 @@ const createProduct = async (req, res) => {
       stock,
       brand,
       description,
-      Assembly,
       material,
       weight,
       sku,
@@ -22,7 +21,8 @@ const createProduct = async (req, res) => {
       CareMaintenance,
       seller,
       Warranty,
-      category
+      category,
+      isFeatured,
     } = req.body || {};
 
     if (
@@ -32,7 +32,7 @@ const createProduct = async (req, res) => {
       !stock ||
       !brand ||
       !description ||
-      !Assembly ||
+      !isFeatured ||
       !material ||
       !weight ||
       !sku ||
@@ -43,7 +43,7 @@ const createProduct = async (req, res) => {
       !BrandCollectionOverview ||
       !CareMaintenance ||
       !seller ||
-      !Warranty||
+      !Warranty ||
       !category
     ) {
       return res.status(400).json({ message: "All fields are required" });
@@ -70,7 +70,7 @@ const createProduct = async (req, res) => {
       finalPrice,
       brand,
       description,
-      Assembly,
+      isFeatured,
       material,
       weight,
       sku,
@@ -82,7 +82,7 @@ const createProduct = async (req, res) => {
       CareMaintenance,
       seller,
       Warranty,
-      category
+      category,
     });
 
     await newProduct.save();
@@ -107,7 +107,7 @@ const updateProduct = async (req, res) => {
       stock,
       brand,
       description,
-      Assembly,
+      isFeatured,
       material,
       weight,
       sku,
@@ -119,7 +119,7 @@ const updateProduct = async (req, res) => {
       CareMaintenance,
       seller,
       Warranty,
-      category
+      category,
     } = req.body || {};
     const product = await Product.findById(id);
     if (!product) {
@@ -149,7 +149,7 @@ const updateProduct = async (req, res) => {
     product.finalPrice = finalPrice ?? product.finalPrice;
     product.brand = brand ?? product.brand;
     product.description = description ?? product.description;
-    product.Assembly = Assembly ?? product.Assembly;
+    product.isFeatured = isFeatured ?? product.isFeatured;
     product.material = material ?? product.material;
     product.weight = weight ?? product.weight;
     product.sku = sku ?? product.sku;
@@ -162,7 +162,7 @@ const updateProduct = async (req, res) => {
     product.CareMaintenance = CareMaintenance ?? product.CareMaintenance;
     product.seller = seller ?? product.seller;
     product.Warranty = Warranty ?? product.Warranty;
-product.category = category ?? product.category;
+    product.category = category ?? product.category;
     const updatedProduct = await product.save();
 
     return res
@@ -232,14 +232,101 @@ const deleteProduct = async (req, res) => {
 
 const searchProducts = async (req, res) => {
   try {
-    const { query } = req.query;
-    const regex=new RegExp(query,'i');
-    const products = await Product.find({$or:[{productName:regex},{description:regex},{brand:regex}]}).populate("subCategory");
-    return res.status(200).json({ message: "Products retrieved successfully", data: products, totalResults:products.length });
+    const { query, category, priceMin, priceMax, discountMin, sortBy,material } =
+      req.query;
 
+    const filter = {};
+    const sort = {};
+
+    if (query) {
+      const regex = new RegExp(query, "i");
+      filter.$or = [
+        { productName: regex },
+        { description: regex },
+        { brand: regex },
+      ];
+    }
+    if (category) {
+      filter.category = category;
+    }
+  
+    if (material) {
+      filter.material = material;
+    }
+    if (priceMin || priceMax) {
+      filter.finalPrice = {};
+      if (priceMin) filter.finalPrice.$gte = priceMin;
+      if (priceMax) filter.finalPrice.$lte = priceMax;
+    }
+
+    if (discountMin) {
+      filter.discount = { $gte: discountMin };
+    }
+
+    if (sortBy === "lowToHigh") sort.finalPrice = 1;
+    else if (sortBy === "highToLow") sort.finalPrice = -1;
+    else if (sortBy === "new") sort.createdAt = -1;
+
+    const products = await Product.find(filter).populate("category").sort(sort);
+
+    return res.status(200).json({
+      message: "Products retrieved successfully",
+      totalResults: products.length,
+      data: products,
+    });
   } catch (error) {
     console.log("search products error", error);
     return res.status(500).json({ message: "Failed to search products" });
+  }
+};
+
+const getFeaturedProducts = async (req, res) => {
+  try {
+    const products = await Product.find({ isFeatured: true }).populate(
+      "subCategory"
+    );
+    return res.status(200).json({
+      message: "Featured products retrieved successfully",
+      data: products,
+    });
+  } catch (error) {
+    console.error("get featured products error", error);
+    res.status(500).json({
+      message: "Failed to retrieve featured products",
+      error: error.message,
+    });
+  }
+};
+
+const getProductByCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const products = await Product.find({ category: id }).populate(
+      "subCategory"
+    );
+    return res
+      .status(200)
+      .json({ message: "Products retrieved successfully", data: products });
+  } catch (error) {
+    console.error("get products by category error", error);
+    res
+      .status(500)
+      .json({ message: "Failed to retrieve products", error: error.message });
+  }
+};
+
+const getAllMaterials = async (req, res) => {
+  try {
+    const materials = await Product.distinct("material");
+    return res.status(200).json({
+      message: "Materials retrieved successfully",
+      data: materials,
+    });
+  } catch (error) {
+    console.error("get all materials error", error);
+    res
+      .status(500)
+      .json({ message: "Failed to retrieve materials", error: error.message });
   }
 }
 export {
@@ -248,5 +335,8 @@ export {
   getSingleProduct,
   updateProduct,
   deleteProduct,
-  searchProducts
+  searchProducts,
+  getFeaturedProducts,
+  getProductByCategory,
+  getAllMaterials
 };

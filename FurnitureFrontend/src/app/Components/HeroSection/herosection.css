@@ -63,8 +63,12 @@
 .herosectionSec-control .carousel-control-prev-icon,
 .herosectionSec-control .carousel-control-next-icon {
   background-color: #000;
-  border-radius: 50%;
+  border-radius: 38%;
   padding: 10px;
+}
+
+.carousel-control-prev-icon,.carousel-control-next-icon {
+  background-size: 60% 60% !important;
 }
 
 /* Carousel indicators */
@@ -93,3 +97,4 @@
     transform: translateY(0);
   }
 }
+

@@ -8,6 +8,8 @@ import pic4 from '@/app/Components/assets/collection/pic4.webp'
 import './collection.css'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchSubCategories } from '@/app/redux/slice/subCategorySlice'
+import Link from 'next/link'
+import { generateSlug } from '@/app/utils/generate-slug'
 
 const Page = () => {
 
@@ -31,6 +33,7 @@ const {subCategories} =useSelector((state) => state.subCategory)
           {subCategories?.filter((category) => category?.isCollection===true)?.map((item) => (
             <div className='collection-card' key={item?._id}>
               <div className='image-wrapper'>
+                <Link href={`/Pages/products/subcategory/${generateSlug(item?.subCategoryName)}/${item?._id}`}>
                 <Image 
                   src={item?.collectionImage} 
                   alt={item?.subCategoryName}
@@ -38,6 +41,7 @@ const {subCategories} =useSelector((state) => state.subCategory)
                   sizes="(max-width: 768px) , (max-width: 1200px) 50vw, 33vw"
                   className='collection-img'
                 />
+                </Link>
               </div>
               <h3 className='collection-title'>{item?.subCategoryName}</h3>
             </div>

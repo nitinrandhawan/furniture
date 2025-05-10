@@ -1,5 +1,6 @@
 import {uploadOnCloudinary} from "../utils/cloudinary.util.js";
 import SubCategory from "../models/subCategory.model.js";
+import Product from "../models/product.model.js";
 const createSubCategory = async (req, res) => {
   try {
     const { category, subCategoryName,isCollection } = req.body || {};
@@ -93,8 +94,7 @@ const getSingleSubCategory = async (req, res) => {
 const getAllSubCategories = async (req, res) => {
   try {
     const subCategories = await SubCategory.find().populate("Category");
-    console.log("subCategories", subCategories);
-    
+  
     return res.status(200).json({
       message: "Sub categories retrieved successfully",
       data: subCategories,
@@ -125,10 +125,22 @@ const deleteSubCategory = async (req, res) => {
       .json({ message: "Failed to delete category", error: error.message });
   }
 };
+
+const getProductsBySubCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const products = await Product.find({ subCategory: id }).populate("subCategory")
+    return res.status(200).json({ message: "Products retrieved successfully", data: products });
+  } catch (error) {
+    console.log("get products by sub category error", error);
+    return res.status(500).json({ message: "Failed to retrieve products", error: error.message });
+  }
+}
 export {
     createSubCategory,
     updateSubCategory,
     getSingleSubCategory,
     getAllSubCategories,
-    deleteSubCategory
+    deleteSubCategory,
+    getProductsBySubCategory
 }

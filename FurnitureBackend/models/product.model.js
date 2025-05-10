@@ -34,10 +34,6 @@ const productSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        Assembly:{
-            type:String,
-            required:true
-        },
         material:{
             type:String,
             required:true
@@ -84,7 +80,11 @@ const productSchema = new mongoose.Schema(
         Warranty:{
             type:String,
             required:true
-        }
+        },
+        isFeatured: {
+            type: Boolean,
+            default: false,
+        },
     },
     { timestamps: true }
 );

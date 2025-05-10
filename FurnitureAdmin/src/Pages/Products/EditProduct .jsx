@@ -7,7 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import axiosInstance from "../../services/FetchNodeServices.js";
 import "./product.css";
 import { fileLimit } from "../../services/fileLimit.js";
-const AddProduct = () => {
+const EditProduct = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [categoryList, setCategoryList] = useState([]);
   const [subcategoryList, setSubcategoryList] = useState([]);
@@ -20,7 +20,7 @@ const AddProduct = () => {
     finalPrice: 0,
     brand: "",
     description: "",
-    Assembly: "",
+    isFeatured: "",
     material: "",
     weight: "",
     sku: "",
@@ -59,7 +59,6 @@ const AddProduct = () => {
       );
       const data = response?.data?.data;
       if (response.status === 200) {
-      
         setFormData({
           productName: data.productName,
           images: [],
@@ -69,7 +68,7 @@ const AddProduct = () => {
           discount: data.discount,
           brand: data.brand,
           description: data.description,
-          Assembly: data.Assembly,
+          isFeatured: data.isFeatured,
           material: data.material,
           weight: data.weight,
           sku: data.sku,
@@ -157,8 +156,8 @@ const AddProduct = () => {
     });
     payload.append("category", formData.categoryId);
     try {
-      const response = await axiosInstance.post(
-        "/api/v1/product/create-product",
+      const response = await axiosInstance.put(
+        `/api/v1/product/update-product/${id}`,
         payload,
         {
           headers: {
@@ -166,8 +165,8 @@ const AddProduct = () => {
           },
         }
       );
-      if (response.status === 201) {
-        toast.success("product created success");
+      if (response.status === 200) {
+        toast.success("product updated success");
         navigate("/all-products");
         setIsLoading(false);
       }
@@ -175,7 +174,7 @@ const AddProduct = () => {
       console.error(error);
       toast.error(
         error?.response?.data?.message ||
-          "Failed to add product. Please try again."
+          "Failed to update product. Please try again."
       );
     } finally {
       setIsLoading(false);
@@ -205,7 +204,7 @@ const AddProduct = () => {
       <ToastContainer />
       <div className="bread">
         <div className="head">
-          <h4>Add Product</h4>
+          <h4>Update Product</h4>
         </div>
         <div className="links">
           <Link to="/all-products" className="add-new">
@@ -239,17 +238,6 @@ const AddProduct = () => {
               name="material"
               className="form-control"
               value={formData.material}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="col-md-3">
-            <label className="form-label">Assembly*</label>
-            <input
-              type="text"
-              name="Assembly"
-              className="form-control"
-              value={formData.Assembly}
               onChange={handleChange}
               required
             />
@@ -320,22 +308,6 @@ const AddProduct = () => {
               <option value="Four Door" />
             </datalist>
           </div>
-
-          {/* <div className="col-md-3">
-            <label className="form-label">Select Type</label>
-            <Autocomplete
-              multiple
-              options={typeOptions}
-
-              value={typeOptions.filter((opt) => formData.type.includes(opt.name))}
-              onChange={(e, newValue) => setFormData((prev) => ({ ...prev, type: newValue.map((opt) => opt.name), }))
-              }
-              getOptionLabel={(option) => option.name}
-              // value={typeOptions.find((opt) => opt.name === formData.type) || null}
-              // onChange={(e, value) => setFormData({ ...formData, type: value?.name || "" })}
-              renderInput={(params) => <TextField {...params} label="Select Type" />}
-            />
-          </div> */}
 
           <div className="col-md-3">
             <label className="form-label">Select Category</label>
@@ -497,13 +469,23 @@ const AddProduct = () => {
                 required
               />
             </div>
+            <div className="col-12" style={{ marginTop: "20px" }}>
+            <div className="form-check">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="status"
+                checked={formData.isFeatured}
+                onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
+              />
+              <label className="form-check-label" htmlFor="status">
+                Featured Product
+              </label>
+            </div>
+          </div>
           </div>
           <div className="col-md-12 mt-4 text-center">
-            <button
-              type="submit"
-              className="btn "
-              disabled={isLoading}
-            >
+            <button type="submit" className="btn " disabled={isLoading}>
               {isLoading ? "Submitting..." : "Submit"}
             </button>
           </div>
@@ -513,4 +495,4 @@ const AddProduct = () => {
   );
 };
 
-export default AddProduct;
+export default EditProduct;

@@ -10,27 +10,15 @@ import 'swiper/css/pagination';
 import { Pagination } from 'swiper/modules';
 import Link from 'next/link';
 
-const Product = () => {
-    const [products, setProducts] = useState([]);
-
-    useEffect(() => {
-        const URL = 'https://api.sddipl.com/api/product/get-all-products-with-pagination';
-        axios.get(URL)
-            .then((response) => {
-                console.log("Products:", response.data?.data);
-                setProducts(response.data?.data || []);
-            })
-            .catch((err) => {
-                console.error("Error fetching products:", err); 
-            });
-    }, []);
-
+const Product = ({products}) => {
+ 
     return (
         <>
+       
         <div className='product-component'>
             <div className='container'>
                 <div className='text-center '>
-                    <h2 className='titleSec'>Check Out More ( Categories name )</h2>
+                    <h2 className='titleSec'>See More {products?.[0]?.subCategory?.subCategoryName || ''} Collection</h2>
                 </div>
             <Swiper
             style={{padding:"0px 0px 20px 0px"}}
@@ -42,10 +30,10 @@ const Product = () => {
                 modules={[Pagination]}
                 className="mySwiper"
             >
-                {products.map((product, index) => (
+                {products?.map((product, index) => (
                     <SwiperSlide key={index}>
                         <div className='product-card'>
-                            <Link href={`/Pages/products/id`} className='product-link'>
+                            <Link href={`/Pages/products/${product._id}`} className='product-link'>
                                 <img className='product-image' src={product.images[0]} alt='product-image' width={300} height={300} />
                                 <div className='product-details'>
                                     <h3>{product.productName}</h3>
