@@ -62,6 +62,11 @@ const cartSlice = createSlice({
   name: "cart",
   initialState: initialState,
   reducers: {
+    resetCartState(state) {
+      state.items = [];
+      state.loading = false;
+      state.error = null;
+    },
     addToCart(state, action) {
       const {
         productId,
@@ -206,6 +211,7 @@ const cartSlice = createSlice({
 });
 
 export const {
+  resetCartState,
   addToCart,
   removeFromCart,
   clearCart,

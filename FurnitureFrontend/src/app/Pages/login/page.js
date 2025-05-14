@@ -7,12 +7,14 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
 import { loginUser } from "@/app/redux/slice/authSlice";
+import { useRouter } from "next/navigation";
 const Page = () => {
   const [loginInput, setLoginInput] = useState("");
   const [loginError, setLoginError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
   const dispatch = useDispatch();
+  const router = useRouter();
   const handleLogin = async(e) => {
     e.preventDefault();
     try {
@@ -26,6 +28,7 @@ const Page = () => {
         toast.success("Login successful!");
         setLoginInput("");
         setPassword("");
+        router.push("/");
       }else{
         toast.error(result.payload.message);
       }

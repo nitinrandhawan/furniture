@@ -8,14 +8,15 @@ import { FaRegHeart } from "react-icons/fa6";
 import Image from "next/image";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts } from "@/app/redux/slice/productSlice";
+import {
+  addToWishlist,
+  addToWishlistToServer,
+} from "@/app/redux/slice/wislistSlice";
 
 const Page = () => {
-  // State to track the wishlisted product ID
   const [wishlistedProductId, setWishlistedProductId] = useState(null);
 
-  // Function to toggle wishlist for a specific product
-  const toggleWishlist = (e, productId) => {
-    e.preventDefault(); // Prevent navigation when clicking the heart
+  const toggleWishlist = (productId) => {
     setWishlistedProductId((prevId) =>
       prevId === productId ? null : productId
     ); // Toggle wishlist state
@@ -23,9 +24,14 @@ const Page = () => {
 
   const dispatch = useDispatch();
   const products = useSelector((state) => state.product.products);
+  const handleWishlist = (item) => {
+    dispatch(addToWishlistToServer(item?._id));
+    toggleWishlist();
+  };
   useEffect(() => {
     dispatch(fetchProducts());
   }, []);
+
   return (
     <>
       {/* Product filter section */}
@@ -192,38 +198,38 @@ const Page = () => {
                     className="product-card"
                     style={{ position: "relative" }}
                   >
-                    <Link href={`/Pages/products/id`} className="product-link">
-                      <Image
-                        className="product-image"
-                        src={item?.images[0] || "/images/placeholder.png"}
-                        alt="product-image"
-                        width={300}
-                        height={300}
-                      />
-                      <div className="product-details">
-                        <h3>{item.productName}</h3>
-                        <div className="product-price-section">
-                          <p className="final-price">₹{item.price}</p>
-                          <p className="price">
-                            <del>₹{item.price}</del>
-                          </p>
-                          <p className="discount">{item.price}% OFF</p>
-                        </div>
+                    {/* <Link href={`/Pages/products/${item?.productId?._id}`} className="product-link"> */}
+                    <Image
+                      className="product-image"
+                      src={item?.images[0] || "/images/placeholder.png"}
+                      alt="product-image"
+                      width={300}
+                      height={300}
+                    />
+                    <div className="product-details">
+                      <h3>{item.productName}</h3>
+                      <div className="product-price-section">
+                        <p className="final-price">₹{item.price}</p>
+                        <p className="price">
+                          <del>₹{item.price}</del>
+                        </p>
+                        <p className="discount">{item.price}% OFF</p>
                       </div>
+                    </div>
 
-                      {/* Wishlist Button */}
-                      <button
-                        className="wishlist-btn"
-                        onClick={(e) => toggleWishlist(e, item.id)}
-                        aria-label="Add to Wishlist"
-                      >
-                        {wishlistedProductId === item.id ? (
-                          <FaHeart className="wishlist-icon red" />
-                        ) : (
-                          <FaRegHeart className="wishlist-icon" />
-                        )}
-                      </button>
-                    </Link>
+                    {/* Wishlist Button */}
+                    <button
+                      className="wishlist-btn"
+                      onClick={() => handleWishlist(item)}
+                      aria-label="Add to Wishlist"
+                    >
+                      {wishlistedProductId === item.id ? (
+                        <FaHeart className="wishlist-icon red" />
+                      ) : (
+                        <FaRegHeart className="wishlist-icon" />
+                      )}
+                    </button>
+                    {/* </Link> */}
                   </div>
                 </div>
               );

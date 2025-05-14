@@ -11,7 +11,6 @@ export const verifyToken = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (err) {
-    console.log("Verify token error", err);
     if (err.name === "JsonWebTokenError") {
       return res.status(401).json({ message: "Invalid token signature." });
     } else if (err.name === "TokenExpiredError") {

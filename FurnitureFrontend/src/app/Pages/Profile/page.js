@@ -9,18 +9,23 @@ import { FaUser, FaShoppingBag, FaMapMarkerAlt, FaCog } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { axiosInstance } from "@/app/utils/axiosInstance";
 import { useDispatch, useSelector } from "react-redux";
-import { verifyUser } from "@/app/redux/slice/authSlice";
+import { resetAuthState, verifyUser } from "@/app/redux/slice/authSlice";
 import { useRouter } from "next/navigation";
+import { NoItem } from "@/app/utils/NoItem";
+import { resetCartState } from "@/app/redux/slice/cartSlice";
+import { resetWishlistState } from "@/app/redux/slice/wislistSlice";
 
 export default function Profile() {
   const [activeTab, setActiveTab] = useState("profile");
   const [avatar, setAvatar] = useState("/User.jpg");
   const fileInputRef = useRef(null);
-
+const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [pincode, setPincode] = useState("");
   const [city, setCity] = useState("");
-
+  const [orders, setOrders] = useState([]);
+  const router = useRouter();
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -32,7 +37,11 @@ export default function Profile() {
   const handleLogout = async () => {
     try {
       await axiosInstance.get("/api/v1/auth/logout");
+      dispatch(resetAuthState())
+      dispatch(resetCartState())
+      dispatch(resetWishlistState())
       toast.success("Logged out successfully");
+     router.push("/")
     } catch (error) {
       console.log("Error logging out:", error);
       toast.error("Failed to log out. Please try again.");
@@ -42,9 +51,44 @@ export default function Profile() {
     fileInputRef.current.click();
   };
 
+  const fetchOrderDetails = async () => {
+    try {
+      const response = await axiosInstance.get("/api/v1/order/get-order");
+      if (response.status === 200) {
+        setOrders(response?.data?.order);
+      }
+    } catch (error) {
+      console.log("Error fetching order details:", error);
+      toast.error(
+        error?.response?.data?.message || "Failed to fetch order details."
+      );
+    }
+  };
+
+  const fetchProfileDetails=async()=>{
+    try {
+   const response =   await axiosInstance.get("/api/v1/auth/get-single-user");
+  const data = response?.data?.user;
+  setAddress(data?.address);
+  setPincode(data?.pincode);
+  setCity(data?.city);
+  setPhone(data?.phone);
+   setName(data?.name);
+    } catch (error) {
+      console.log("Error fetching profile details:", error);
+      toast.error(
+        error?.response?.data?.message || "Failed to fetch profile details."
+      );
+    }
+  }
+  
+  useEffect(() => {
+    fetchProfileDetails()
+    fetchOrderDetails();
+  }, []);
+
   const dataSubmit = (e) => {
     e.preventDefault();
-    console.log("Address Details:", { address, pincode, city });
   };
 
   const renderContent = () => {
@@ -52,17 +96,15 @@ export default function Profile() {
       case "profile":
         return <ProfileInfo />;
       case "orders":
-        return <Orders />;
+        return <Orders orders={orders} />;
       case "address":
         return (
           <Address
             address={address}
-            setAddress={setAddress}
+            phone={phone}
             pincode={pincode}
-            setPincode={setPincode}
             city={city}
-            setCity={setCity}
-            dataSubmit={dataSubmit}
+            name={name}
           />
         );
       case "settings":
@@ -72,11 +114,11 @@ export default function Profile() {
     }
   };
   const dispatch = useDispatch();
-  const router = useRouter();
-  const { user,loading } = useSelector((state) => state.auth);
+
+  const { user, loading } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    if(loading) return;
+    if (loading) return;
     if (!user?.email) {
       router.push("/Pages/login");
     }
@@ -84,122 +126,120 @@ export default function Profile() {
   useEffect(() => {
     dispatch(verifyUser());
   }, [dispatch]);
-  
- 
+
   return (
     <>
-    {
-      loading ? (
+      {loading ? (
         <div>
           <h1>Loading...</h1>
         </div>
-      ) :(
+      ) : (
         <>
-         <Head>
-        <title>Admin Profile UI</title>
-      </Head>
- 
-      <div className="container-fluid profile-layout">
-        <div className="row">
-          {/* Sidebar */}
-          <div className="col-md-3 sidebar p-4 text-white d-flex flex-column justify-content-between">
-            <div>
-              <div className="text-center mb-4">
-                <div className="profile-avatar-container">
-                  <Image
-                    src={avatar}
-                    alt="Avatar"
-                    width={90}
-                    height={90}
-                    className="rounded-circle profile-avatar mb-2"
-                  />
-                  <div className="change-icon" onClick={triggerFileInput}>
-                    +
+          <Head>
+            <title>Admin Profile UI</title>
+          </Head>
+
+          <div className="container-fluid profile-layout">
+            <div className="row">
+              {/* Sidebar */}
+              <div className="col-md-3 sidebar p-4 text-white d-flex flex-column justify-content-between">
+                <div>
+                  <div className="text-center mb-4">
+                    <div className="profile-avatar-container">
+                      <Image
+                        src={avatar}
+                        alt="Avatar"
+                        width={90}
+                        height={90}
+                        className="rounded-circle profile-avatar mb-2"
+                      />
+                      <div className="change-icon" onClick={triggerFileInput}>
+                        +
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        ref={fileInputRef}
+                        style={{ display: "none" }}
+                        onChange={handleImageChange}
+                      />
+                    </div>
+                    <h6 className="mb-0">Mukesh Mahar</h6>
+                    <small>mukeshmahar00@gmail.com</small>
+                    <br />
+                    <small>Delhi India</small>
                   </div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    ref={fileInputRef}
-                    style={{ display: "none" }}
-                    onChange={handleImageChange}
-                  />
+
+                  <ul className="nav flex-column mt-4">
+                    <li
+                      className="nav-item"
+                      onClick={() => setActiveTab("profile")}
+                    >
+                      <a
+                        className={`nav-link ${
+                          activeTab === "profile" ? "active" : ""
+                        }`}
+                      >
+                        <FaUser /> Profile Info
+                      </a>
+                    </li>
+                    <li
+                      className="nav-item"
+                      onClick={() => setActiveTab("orders")}
+                    >
+                      <a
+                        className={`nav-link ${
+                          activeTab === "orders" ? "active" : ""
+                        }`}
+                      >
+                        <FaShoppingBag /> Orders
+                      </a>
+                    </li>
+                    <li
+                      className="nav-item"
+                      onClick={() => setActiveTab("address")}
+                    >
+                      <a
+                        className={`nav-link ${
+                          activeTab === "address" ? "active" : ""
+                        }`}
+                      >
+                        <FaMapMarkerAlt /> Address
+                      </a>
+                    </li>
+                    <li
+                      className="nav-item"
+                      onClick={() => setActiveTab("settings")}
+                    >
+                      <a
+                        className={`nav-link ${
+                          activeTab === "settings" ? "active" : ""
+                        }`}
+                      >
+                        <FaCog /> Settings
+                      </a>
+                    </li>
+                  </ul>
                 </div>
-                <h6 className="mb-0">Mukesh Mahar</h6>
-                <small>mukeshmahar00@gmail.com</small>
-                <br />
-                <small>Delhi India</small>
+
+                <div className="text-center">
+                  <button
+                    className="btn btn-secondary  w-100 mt-4"
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </button>
+                </div>
               </div>
 
-              <ul className="nav flex-column mt-4">
-                <li
-                  className="nav-item"
-                  onClick={() => setActiveTab("profile")}
-                >
-                  <a
-                    className={`nav-link ${
-                      activeTab === "profile" ? "active" : ""
-                    }`}
-                  >
-                    <FaUser /> Profile Info
-                  </a>
-                </li>
-                <li className="nav-item" onClick={() => setActiveTab("orders")}>
-                  <a
-                    className={`nav-link ${
-                      activeTab === "orders" ? "active" : ""
-                    }`}
-                  >
-                    <FaShoppingBag /> Orders
-                  </a>
-                </li>
-                <li
-                  className="nav-item"
-                  onClick={() => setActiveTab("address")}
-                >
-                  <a
-                    className={`nav-link ${
-                      activeTab === "address" ? "active" : ""
-                    }`}
-                  >
-                    <FaMapMarkerAlt /> Address
-                  </a>
-                </li>
-                <li
-                  className="nav-item"
-                  onClick={() => setActiveTab("settings")}
-                >
-                  <a
-                    className={`nav-link ${
-                      activeTab === "settings" ? "active" : ""
-                    }`}
-                  >
-                    <FaCog /> Settings
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div className="text-center">
-              <button
-                className="btn btn-secondary  w-100 mt-4"
-                onClick={handleLogout}
-              >
-                Logout
-              </button>
+              {/* Main Content */}
+              <div className="col-md-9 p-4">
+                <div className="content-area">{renderContent()}</div>
+              </div>
             </div>
           </div>
-
-          {/* Main Content */}
-          <div className="col-md-9 p-4">
-            <div className="content-area">{renderContent()}</div>
-          </div>
-        </div>
-      </div>
-
         </>
-      )
-    }
-    
+      )}
     </>
   );
 }
@@ -224,34 +264,62 @@ const ProfileInfo = () => (
 );
 
 // Orders Component
-const Orders = () => (
+const Orders = ({ orders }) => (
   <div className="d-flex flex-wrap">
-    <div className="card ms-5 mt-3 " style={{ maxWidth: "585px" }}>
-      <div className="row g-0">
-        <div className="col-md-4">
-          <Image src={pic1} className="img-fluid " alt="Order1" />
-        </div>
-        <div className="col-md-8">
-          <div className="card-body">
-            <h5 className="card-title">Drawing Room Sofa</h5>
-            <ul className="list-group">
-              <b>Order No: M-T1265</b>
-              <li className="list-group-item">
-                12345 - ₹5000 - <span className="text-success">Delivered</span>
-              </li>
-            </ul>
-            <p className="card-text">This is a wider sofa.</p>
-            <p className="card-text">
-              <small className="text-body-secondary">
-                Last updated 3 mins ago
-              </small>
-            </p>
+    {orders && orders.length > 0 ? (
+      orders.map((order) => (
+        <div
+          className="card ms-5 mt-3 "
+          style={{ maxWidth: "585px" }}
+          key={order._id}
+        >
+          <div className="row g-0">
+            <div className="col-md-4">
+              {order?.items?.map((item) => (
+                <Image
+                  key={item._id}
+                  src={item?.productId?.images?.[0]}
+                  width={100}
+                  height={100}
+                  className="img-fluid "
+                  alt="Order1"
+                />
+              ))}
+            </div>
+            <div className="col-md-8">
+              <div className="card-body">
+                <h5 className="card-title">{order?.productId?.productName}</h5>
+                <ul className="list-group">
+                  <b>Order No: {order?.orderUniqueId}</b>
+                  <li className="list-group-item">
+                    12345 - ₹5000 -{" "}
+                    <span className="text-success">{order?.orderStatus}</span>
+                  </li>
+                </ul>
+                <p className="card-text">This is a wider sofa.</p>
+                <p className="card-text">
+                  <small className="text-body-secondary">
+                    Last updated{" "}
+                    {new Date(order?.updatedAt).toLocaleString("en-IN", {
+                      hour: "numeric",
+                      minute: "numeric",
+                      hour12: true,
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </small>
+                </p>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+      ))
+    ) : (
+      <NoItem name={"Orders"} />
+    )}
 
-    <div className="card ms-5 mt-3" style={{ maxWidth: "585px" }}>
+    {/* <div className="card ms-5 mt-3" style={{ maxWidth: "585px" }}>
       <div className="row g-0">
         <div className="col-md-4">
           <Image src={pic2} className="img-fluid rounded-start" alt="Order2" />
@@ -274,40 +342,55 @@ const Orders = () => (
           </div>
         </div>
       </div>
-    </div>
+    </div> */}
   </div>
 );
 
 // Address Component (UPDATED)
 const Address = ({
+  name,
+  phone,
   address,
-  setAddress,
   pincode,
-  setPincode,
   city,
-  setCity,
+ 
 }) => {
   const [editMode, setEditMode] = useState(false);
-
-  const [tempAddress, setTempAddress] = useState(address);
-  const [tempPincode, setTempPincode] = useState(pincode);
-  const [tempCity, setTempCity] = useState(city);
-
+  const [formData, setFormData] = useState({
+    name: "",
+    phone: "",
+    address: "",
+    pincode: "",
+    city: "",
+  });
   const handleEdit = () => {
-    setTempAddress(address);
-    setTempPincode(pincode);
-    setTempCity(city);
     setEditMode(true);
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    setAddress(tempAddress);
-    setPincode(tempPincode);
-    setCity(tempCity);
-    setEditMode(false);
+    try {
+      const response = await axiosInstance.put(
+        "/api/v1/auth/update-profile",
+        formData
+      );
+      toast.success("Address saved successfully");
+      setEditMode(false);
+    } catch (error) {
+      console.log("Error saving address:", error);
+      toast.error("Failed to save address. Please try again.");
+    }
   };
 
+  useEffect(() => {
+    setFormData({
+      name: name,
+      phone: phone,
+      address: address,
+      pincode: pincode,
+      city: city,
+    });
+  },[])
   return (
     <div className="container">
       <div className="card shadow p-4 mb-5">
@@ -319,6 +402,8 @@ const Address = ({
               <table className="table table-bordered text-center">
                 <thead className="table-light">
                   <tr>
+                    <th>Name</th>
+                    <th>Phone</th>
                     <th>Address</th>
                     <th>Pin Code</th>
                     <th>City</th>
@@ -326,9 +411,11 @@ const Address = ({
                 </thead>
                 <tbody>
                   <tr>
-                    <td>{address || "-"}</td>
-                    <td>{pincode || "-"}</td>
-                    <td>{city || "-"}</td>
+                    <th>{formData.name || "-"}</th>
+                    <th>{formData.phone || "-"}</th>
+                    <th>{formData.address || "-"}</th>
+                    <th>{formData.pincode || "-"}</th>
+                    <th>{formData.city || "-"}</th>
                   </tr>
                 </tbody>
               </table>
@@ -346,9 +433,11 @@ const Address = ({
                 <input
                   type="text"
                   className="form-control"
-                  placeholder="Address Name"
-                  value={tempAddress}
-                  onChange={(e) => setTempAddress(e.target.value)}
+                  placeholder="Name"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   required
                 />
               </div>
@@ -357,20 +446,48 @@ const Address = ({
                 <input
                   type="text"
                   className="form-control"
-                  placeholder="Pin Code"
-                  value={tempPincode}
-                  onChange={(e) => setTempPincode(e.target.value)}
+                  placeholder="Phone"
+                  value={formData.phone}
+                  onChange={(e) =>
+                    setFormData({ ...formData, phone: e.target.value })
+                  }
                   required
                 />
               </div>
 
+              <div className="col-md-4 mb-3">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Address"
+                  value={formData.address}
+                  onChange={(e) =>
+                    setFormData({ ...formData, address: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div className="col-md-4 mb-3">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Pincode"
+                  value={formData.pincode}
+                  onChange={(e) =>
+                    setFormData({ ...formData, pincode: e.target.value })
+                  }
+                  required
+                />
+              </div>
               <div className="col-md-4 mb-3">
                 <input
                   type="text"
                   className="form-control"
                   placeholder="City Name"
-                  value={tempCity}
-                  onChange={(e) => setTempCity(e.target.value)}
+                  value={formData.city}
+                  onChange={(e) =>
+                    setFormData({ ...formData, city: e.target.value })
+                  }
                   required
                 />
               </div>

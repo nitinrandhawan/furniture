@@ -32,6 +32,7 @@ import {
   safeJSONParse,
   setCartFromLocalStorage,
 } from "@/app/redux/slice/cartSlice";
+import { getWishlistFromServer } from "@/app/redux/slice/wislistSlice";
 
 const dropdownContentprev = {
   Furniture: {
@@ -161,6 +162,7 @@ const Navbar = () => {
       quantity: 2,
     },
   ]);
+
   const [isCartOpen, setIsCartOpen] = useState(false);
   const closeCart = () => setIsCartOpen(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -177,6 +179,7 @@ const Navbar = () => {
 
   const { user, loading } = useSelector((state) => state.auth);
   const { items } = useSelector((state) => state.cart);
+  const { wishlist } = useSelector((state) => state.wishlist);
   const fetchDropdownContent = async () => {
     try {
       const reponse = await axiosInstance.get(
@@ -200,6 +203,7 @@ const Navbar = () => {
 
     if (user && user?.email) {
       dispatch(fetchCartItems());
+          dispatch(getWishlistFromServer());
     } else {
       if (typeof window !== "undefined") {
         const cartData = localStorage.getItem("cart");
@@ -297,7 +301,7 @@ const Navbar = () => {
                 href="/Pages/Wishlist"
                 className="text-decoration-none text-dark"
               >
-                <FaHeart /> Wishlist (0)
+                <FaHeart /> Wishlist ({wishlist?.products?.length || 0})
               </Link>
             </span>
             {/* 🛒 Updated this line below: */}
@@ -305,7 +309,7 @@ const Navbar = () => {
               style={{ cursor: "pointer" }}
               onClick={() => setIsCartOpen(true)}
             >
-              <MdShoppingCart /> Cart (2)
+              <MdShoppingCart /> Cart ({items?.length})
             </span>
           </div>
         </div>

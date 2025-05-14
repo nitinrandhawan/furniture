@@ -9,6 +9,13 @@ import { fetchCategories } from "@/app/redux/slice/categorySllice";
 import { fetchMaterials } from "@/app/redux/slice/productSlice";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
+import {
+  addToWishlist,
+  getWishlistFromServer,
+  removeFromWishlistToServer,
+} from "@/app/redux/slice/wislistSlice";
+import toast from "react-hot-toast";
+import { axiosInstance } from "@/app/utils/axiosInstance";
 
 const Page = ({ products }) => {
   const [wishlistedProductId, setWishlistedProductId] = useState(null);
@@ -21,22 +28,44 @@ const Page = ({ products }) => {
     { label: "₹10,000 - ₹30,000", priceMin: 10000, priceMax: 30000 },
     { label: "Above ₹30,000", priceMin: 30000, priceMax: Infinity },
   ];
-    const dispatch = useDispatch();
-    const categories = useSelector((state) => state.category.categories);
-    const materials = useSelector((state) => state.product.materials);
+  const dispatch = useDispatch();
+  const categories = useSelector((state) => state.category.categories);
+  const materials = useSelector((state) => state.product.materials);
+  const { wishlist } = useSelector((state) => state.wishlist);
+
   const handleSortChange = (e) => {
     const sortValue = e.target.value;
     router.push(`/Pages/products/search?sortBy=${sortValue}`);
   };
-  const toggleWishlist = (e, productId) => {
-    e.preventDefault(); 
-    setWishlistedProductId((prevId) =>
-      prevId === productId ? null : productId
-    ); // Toggle wishlist state
+  const handleWishlist = async (productId, product) => {
+    const exist = wishlist?.products?.some(
+      (item) => item._id.trim() === productId.trim()
+    );
+
+    if (exist) {
+      dispatch(removeFromWishlistToServer(productId));
+    } else {
+      try {
+        const response = await axiosInstance.post(
+          "/api/v1/wishlist/add-to-wishlist",
+          {
+            productId,
+          }
+        );
+        if (response.status === 201) {
+          dispatch(addToWishlist(product));
+        }
+      } catch (error) {
+        console.log("Error adding to wishlist:", error);
+        toast.error("Failed to add to wishlist. Please try again.");
+      }
+    }
   };
+
   useEffect(() => {
     dispatch(fetchCategories());
     dispatch(fetchMaterials());
+    dispatch(getWishlistFromServer());
   }, []);
   return (
     <>
@@ -56,8 +85,7 @@ const Page = ({ products }) => {
                     Price
                   </button>
                   <ul className="dropdown-menu">
-                  {
-                    priceRanges?.map((priceRange, index) => {
+                    {priceRanges?.map((priceRange, index) => {
                       return (
                         <li key={index}>
                           <Link
@@ -68,8 +96,7 @@ const Page = ({ products }) => {
                           </Link>
                         </li>
                       );
-                    })
-                  }
+                    })}
                   </ul>
                 </div>
                 {/* Category Dropdown */}
@@ -81,16 +108,18 @@ const Page = ({ products }) => {
                     Category
                   </button>
                   <ul className="dropdown-menu">
-                  {  categories?.slice(0, 10)?.map((category, index) => {
-                            return (
-                                <li key={index}>
-                                    <Link className="dropdown-item" href={`/Pages/products/search?category=${category?._id}`}>
-                                        {category?.categoryName}
-                                    </Link>
-                                </li>
-                            )
-                        })
-                    }
+                    {categories?.slice(0, 10)?.map((category, index) => {
+                      return (
+                        <li key={index}>
+                          <Link
+                            className="dropdown-item"
+                            href={`/Pages/products/search?category=${category?._id}`}
+                          >
+                            {category?.categoryName}
+                          </Link>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
                 {/* Material Dropdown */}
@@ -102,17 +131,18 @@ const Page = ({ products }) => {
                     Material
                   </button>
                   <ul className="dropdown-menu">
-                    {  materials?.slice(0, 10)?.map((material, index) => {
-                            return (
-                                <li key={index}>
-                                    <Link className="dropdown-item" href={`/Pages/products/search?material=${material}`}>
-                                        {material}
-                                    </Link>
-                                </li>
-                            )
-                        })
-                    }
-                  
+                    {materials?.slice(0, 10)?.map((material, index) => {
+                      return (
+                        <li key={index}>
+                          <Link
+                            className="dropdown-item"
+                            href={`/Pages/products/search?material=${material}`}
+                          >
+                            {material}
+                          </Link>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
                 {/* Size Dropdown */}
@@ -217,20 +247,27 @@ const Page = ({ products }) => {
                           <p className="discount">{item.price}% OFF</p>
                         </div>
                       </div>
-
-                      {/* Wishlist Button */}
-                      <button
-                        className="wishlist-btn"
-                        onClick={(e) => toggleWishlist(e, item.id)}
-                        aria-label="Add to Wishlist"
-                      >
-                        {wishlistedProductId === item.id ? (
-                          <FaHeart className="wishlist-icon red" />
-                        ) : (
-                          <FaRegHeart className="wishlist-icon" />
-                        )}
-                      </button>
                     </Link>
+                    {/* Wishlist Button */}
+                    <button
+                      className="wishlist-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleWishlist(item?._id, item);
+                      }}
+                      aria-label="Add to Wishlist"
+                    >
+                      {wishlist?.products?.some(
+                        (product) => product._id === item._id
+                      ) ? (
+                        <FaHeart
+                          className="wishlist-icon"
+                          style={{ color: "#ffd632" }}
+                        />
+                      ) : (
+                        <FaRegHeart className="wishlist-icon" />
+                      )}
+                    </button>
                   </div>
                 </div>
               );

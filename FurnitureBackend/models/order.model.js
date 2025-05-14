@@ -22,10 +22,6 @@ const addressSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  pinCode: {
-    type: String,
-    required: true,
-  },
   country: {
     type: String,
     required: true,
@@ -43,7 +39,7 @@ const orderSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    orderItems: [itemsSchema],
+    items: [itemsSchema],
     totalAmount: {
       type: Number,
       required: true,
@@ -64,7 +60,7 @@ const orderSchema = new mongoose.Schema(
     paymentStatus: {
       type: String,
       required: true,
-      enum: ["pending", "success", "failed"],
+      enum: ["Pending", "Paid", "Failed"],
     },
     paymentMethod: {
       type: String,
@@ -87,7 +83,7 @@ const orderSchema = new mongoose.Schema(
     },
     orderStatus: {
       type: String,
-      enum: ["Placed", "Shipped", "Delivered", "Cancelled", "Confirmed"],
+      enum: ["Placed", "Shipped", "Delivered", "Cancelled","Confirmed"],
       default: "Placed",
     },
     deliveredAt: {
@@ -103,4 +99,5 @@ const orderSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("Order", orderSchema);
+const Checkout = mongoose.model("Order", orderSchema);
+export default Checkout;

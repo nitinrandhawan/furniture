@@ -64,8 +64,8 @@ const SignupPage = () => {
 
   const verifyOtp = async () => {
     try {
-      if(!signupData.otp) {
-       toast.error("Please enter the OTP sent to your email.");
+      if (!signupData.otp) {
+        toast.error("Please enter the OTP sent to your email.");
         return;
       }
       const response = await axiosInstance.post(
@@ -89,7 +89,7 @@ const SignupPage = () => {
     }
   };
 
-  const handleSignup = async(e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
     const errors = {};
 
@@ -101,35 +101,35 @@ const SignupPage = () => {
 
     if (Object.keys(errors).length === 0) {
       setSubmitting(true);
-     try {
-   const result =   await dispatch(registerUser(signupData));
-      if (registerUser.fulfilled.match(result)) {
-        setSignupData({
-          email: "",
-          otp: "",
-          password: "",
-          phone: "",
-          fullName: "",
-        });
-        setSubmitting(false);
-        toast.success(result.payload || "Signup successful!");
-setTimeout(() => {
-  router.push("/Pages/login");
-}, 1000);
-      } else {
-        toast.error(result.payload || "Failed to sign up. Please try again.");
-      }
-     } catch (error) {
+      try {
+        const result = await dispatch(registerUser(signupData));
+        if (registerUser.fulfilled.match(result)) {
+          setSignupData({
+            email: "",
+            otp: "",
+            password: "",
+            phone: "",
+            fullName: "",
+          });
+          setSubmitting(false);
+          toast.success(result.payload || "Signup successful!");
+          setTimeout(() => {
+            router.push("/Pages/login");
+          }, 1000);
+        } else {
+          toast.error(result.payload || "Failed to sign up. Please try again.");
+        }
+      } catch (error) {
         console.log("Error during signup:", error);
         setSubmitting(false);
         toast.error(
-          error?.response?.data?.message || "Failed to sign up. Please try again."
+          error?.response?.data?.message ||
+            "Failed to sign up. Please try again."
         );
       }
-      
-     }
     }
- 
+  };
+
   return (
     <section className="signup-furniture-container">
       <div className="signup-furniture-wrapper">
@@ -204,7 +204,7 @@ setTimeout(() => {
               {/* Password & phone after OTP Verified */}
               {otpVerified && (
                 <>
-                 <div className="furniture-input-group">
+                  <div className="furniture-input-group">
                     <input
                       type="text"
                       name="fullName"
@@ -214,7 +214,9 @@ setTimeout(() => {
                       required
                     />
                     {signupErrors.fullName && (
-                      <span className="error-text">{signupErrors.fullName}</span>
+                      <span className="error-text">
+                        {signupErrors.fullName}
+                      </span>
                     )}
                   </div>
                   <div className="furniture-input-group">

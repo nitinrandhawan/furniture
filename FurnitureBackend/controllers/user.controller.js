@@ -226,7 +226,7 @@ const SignUp = async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    await User.create({ email, fullName, phone, password });
+    await User.create({ email, name:fullName, phone, password });
    await isVerifiedUser.deleteOne();
     return res.status(201).json({ message: "User created successfully" });
   } catch (error) {
@@ -405,11 +405,11 @@ const GetAllUsers = async (req, res) => {
 
 const GetSingleUser = async (req, res) => {
   try {
-    const { id } = req.params;
-    if (!id) {
+    const { _id } = req.user;
+    if (!_id) {
       return res.status(400).json({ message: "User id is required" });
     }
-    const user = await User.findById(id).select(
+    const user = await User.findById(_id).select(
       "-password -resetPasswordToken -resetPasswordExpires -role"
     );
     return res.status(200).json({ message: "Single user", user });
@@ -470,26 +470,20 @@ const updateProfile = async (req, res) => {
     if (!data) {
       return res.status(400).json({ message: "User not found" });
     }
-    const user = await User.findById(data.id);
+    const user = await User.findById(data._id);
     const {
-      fullName,
-      lastName,
+      name,
       phone,
       city,
-      state,
-      landMark,
       pincode,
       address,
     } = req.body || {};
 
-    user.fullName = fullName ?? user.fullName;
-    user.lastName = lastName ?? user.lastName;
-    user.phone = phone ?? user.phone;
-    user.city = city ?? user.city;
-    user.state = state ?? user.state;
-    user.landMark = landMark ?? user.landMark;
-    user.pincode = pincode ?? user.pincode;
-    user.address = address ?? user.address;
+    user.name = name ?? user.name ?? "";
+    user.phone = phone ?? user.phone ?? "";
+    user.city = city ?? user.city ?? "";
+    user.pincode = pincode ?? user.pincode ?? "";
+    user.address = address ?? user.address ?? "";
     if (req.file && req.file?.path) {
       if (user.profileImage) {
         await deleteFromCloudinary(user.profileImage);

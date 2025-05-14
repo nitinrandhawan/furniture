@@ -17,7 +17,7 @@ const createWishlist = async (req, res) => {
     } else {
       await Wishlist.create({ productId: [productId], user: _id });
     }
-    return res.status(200).json({ message: "Wishlist created successfully" });
+    return res.status(201).json({ message: "Wishlist created successfully" });
   } catch (error) {
     return res.status(500).json({ message: "Internal server error", error });
   }
@@ -28,7 +28,7 @@ const getAllWishlists = async (req, res) => {
     if(!req?.user?._id){
       return res.status(400).json({ message: "You are not logged in" });
     }
-    const wishlists = await Wishlist.find().populate("products");
+    const wishlists = await Wishlist.findOne({ user: req?.user?._id }).populate("products");
     return res.status(200).json({ message: "All wishlists", wishlists });
   } catch (error) {
     return res.status(500).json({ message: "Internal server error", error });
@@ -44,7 +44,7 @@ const deleteWishlist=async(req,res)=>{
     if (!id) {
       return res.status(400).json({ message: "id is required" });
     }
-    const wishlist = await Wishlist.findByIdAndDelete(id);
+    const wishlist = await Wishlist.findOneAndUpdate({ user: req?.user?._id }, { $pull: { products: id } }, { new: true });
     if (!wishlist) {
       return res.status(404).json({ message: "Wishlist not found" });
     }

@@ -3,16 +3,25 @@ import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config();
 import cookieParser from "cookie-parser";
-import {connectDB} from "./db/index.js";
+import { connectDB } from "./db/index.js";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(cors({
-  origin: ["http://localhost:3000","http://localhost:3001"],
-  credentials: true
-}));
+const allowedOrigins = ["http://localhost:3000", "http://localhost:3001"];
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 app.use(cookieParser());
 connectDB();
 
@@ -28,6 +37,7 @@ import subCategoryRouter from "./routes/subCategory.route.js";
 import categoryRouter from "./routes/category.route.js";
 import becomeFranchiseRouter from "./routes/BecomeFranchise.route.js";
 import cartRouter from "./routes/cart.route.js";
+import orderRouter from "./routes/order.route.js";
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/category", categoryRouter);
@@ -40,6 +50,7 @@ app.use("/api/v1/contact", contactRouter);
 app.use("/api/v1/video", videoRouter);
 app.use("/api/v1/wishlist", wishlistRouter);
 app.use("/api/v1/cart", cartRouter);
+app.use("/api/v1/order", orderRouter);
 
 app.get("/", (req, res) => {
   res.send("Server is running");

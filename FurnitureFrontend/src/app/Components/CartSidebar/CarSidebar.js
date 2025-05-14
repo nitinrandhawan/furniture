@@ -5,7 +5,7 @@ import { MdClose, MdDelete } from "react-icons/md";
 import Image from "next/image";
 import "./CartSidebar.css";
 import Link from "next/link";
-import { useRouter } from "next/navigation"; // ✅ Correct for App Router
+import { useRouter } from "next/navigation"; 
 import { useDispatch, useSelector } from "react-redux";
 import {
   decreaseQuantity,
@@ -75,8 +75,12 @@ const CartSidebar = ({ isOpen, onClose, cartItems = [], onRemoveItem }) => {
     }
   };
   const total = items.reduce((sum, item) => {
-    const price = item.finalPrice ? item.finalPrice : item.productId.finalPrice;
-    return sum + price * item.quantity;
+    const price =
+      item?.finalPrice ??
+      item?.productId?.finalPrice ??
+      0; 
+  
+    return sum + price * (item?.quantity || 1);
   }, 0);
   useEffect(() => {
     if (loading) return;
@@ -156,10 +160,10 @@ const CartSidebar = ({ isOpen, onClose, cartItems = [], onRemoveItem }) => {
                   </p>
                 </>
               ) : (
-                items.map((item) => (
+                items.map((item, index) => (
                   <div
                     className="cart-item border-bottom d-flex gap-3 py-3"
-                    key={item.id}
+                    key={index}
                   >
                     <Image
                       src={item?.image || item?.productId?.images[0]}
@@ -179,7 +183,7 @@ const CartSidebar = ({ isOpen, onClose, cartItems = [], onRemoveItem }) => {
                         >
                           -
                         </button>
-                        <span>{item.quantity}</span>
+                        <span>{item?.quantity}</span>
                         <button
                           className="btn btn-outline-secondary btn-sm"
                           onClick={() =>

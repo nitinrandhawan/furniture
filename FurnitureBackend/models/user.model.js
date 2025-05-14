@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema(
         )}`;
       },
     },
-    fullName: {
+    name: {
       type: String,
       required: true,
     },
@@ -36,12 +36,6 @@ const userSchema = new mongoose.Schema(
       default: "user",
     },
     city: {
-      type: String,
-    },
-    state: {
-      type: String,
-    },
-    landMark: {
       type: String,
     },
     pincode: {

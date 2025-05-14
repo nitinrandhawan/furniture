@@ -12,6 +12,13 @@ import { NoItem } from "@/app/utils/NoItem";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCategories } from "@/app/redux/slice/categorySllice";
 import { fetchMaterials } from "@/app/redux/slice/productSlice";
+import toast from "react-hot-toast";
+import {
+  addToWishlist,
+  addToWishlistToLocal,
+  getWishlistFromServer,
+  removeFromWishlistToServer,
+} from "@/app/redux/slice/wislistSlice";
 
 const Page = () => {
   const [wishlistedProductId, setWishlistedProductId] = useState(null);
@@ -25,12 +32,6 @@ const Page = () => {
     { label: "₹10,000 - ₹30,000", priceMin: 10000, priceMax: 30000 },
     { label: "Above ₹30,000", priceMin: 30000, priceMax: Infinity },
   ];
-  const toggleWishlist = (e, productId) => {
-    e.preventDefault();
-    setWishlistedProductId((prevId) =>
-      prevId === productId ? null : productId
-    );
-  };
   const fetchProductsBySubCategory = async (id) => {
     try {
       const subCategoryId = extractIdFromSlug(id);
@@ -51,6 +52,8 @@ const Page = () => {
   const dispatch = useDispatch();
   const categories = useSelector((state) => state.category.categories);
   const materials = useSelector((state) => state.product.materials);
+  const { wishlist } = useSelector((state) => state.wishlist);
+const {user}=useSelector((state)=>state.auth)
   const router = useRouter();
   const handleSortChange = (e) => {
     const sortValue = e.target.value;
@@ -60,6 +63,39 @@ const Page = () => {
     fetchProductsBySubCategory(id);
   }, [id]);
 
+  const handleWishlist = async (productId, product) => {
+    const exist = wishlist?.products?.some(
+      (item) => item._id.trim() === productId.trim()
+    );
+
+    if (exist) {
+      if(user && user?.email){
+        dispatch(removeFromWishlistToServer(productId));
+      }else{
+        dispatch(addToWishlistToLocal(product));
+      }
+    } else {
+      if(user && user?.email){
+         try {
+        const response = await axiosInstance.post(
+          "/api/v1/wishlist/add-to-wishlist",
+          {
+            productId,
+          }
+        );
+        if (response.status === 201) {
+          dispatch(addToWishlist(product));
+        }
+      } catch (error) {
+        console.log("Error adding to wishlist:", error);
+        toast.error("Failed to add to wishlist. Please try again.");
+      }
+      }
+     else{
+        dispatch(addToWishlist(product));
+     }
+    }
+  };
   useEffect(() => {
     if (typeof window !== "undefined") {
       window.scrollTo({
@@ -67,7 +103,7 @@ const Page = () => {
         behavior: "smooth",
       });
     }
-
+    dispatch(getWishlistFromServer());
     if (!categories.length) dispatch(fetchCategories());
     if (!materials.length) dispatch(fetchMaterials());
   }, []);
@@ -255,37 +291,47 @@ const Page = () => {
                       href={`/Pages/products/${item?._id}`}
                       className="product-link"
                     >
-                      <Image
-                        className="product-image"
-                        src={item?.images[0] || "/images/placeholder.png"}
-                        alt="product-image"
-                        width={300}
-                        height={300}
-                      />
-                      <div className="product-details">
-                        <h3>{item.productName}</h3>
-                        <div className="product-price-section">
-                          <p className="final-price">₹{item?.finalPrice}</p>
-                          <p className="price">
-                            <del>₹{item?.price}</del>
-                          </p>
-                          <p className="discount">{item?.discount}% OFF</p>
-                        </div>
+                    <Image
+                      className="product-image"
+                      src={item?.images[0] || "/images/placeholder.png"}
+                      alt="product-image"
+                      width={300}
+                      height={300}
+                    />
+                    <div className="product-details">
+                      <h3>{item.productName}</h3>
+                      <div className="product-price-section">
+                        <p className="final-price">₹{item?.finalPrice}</p>
+                        <p className="price">
+                          <del>₹{item?.price}</del>
+                        </p>
+                        <p className="discount">{item?.discount}% OFF</p>
                       </div>
+                    </div>
+</Link>
+                    {/* Wishlist Button */}
+                    <button
+                      className="wishlist-btn"
+                                   onClick={(e) => {
+                e.stopPropagation(); 
+                handleWishlist(item?._id, item);
+              }}
 
-                      {/* Wishlist Button */}
-                      <button
-                        className="wishlist-btn"
-                        onClick={(e) => toggleWishlist(e, item.id)}
-                        aria-label="Add to Wishlist"
-                      >
-                        {wishlistedProductId === item.id ? (
-                          <FaHeart className="wishlist-icon red" />
-                        ) : (
-                          <FaRegHeart className="wishlist-icon" />
-                        )}
-                      </button>
-                    </Link>
+                      aria-label="Add to Wishlist"
+                    >
+                      {wishlist?.products?.some(
+                        (product) => product._id === item._id
+                      ) ? (
+                        <FaHeart
+                          className="wishlist-icon"
+                          style={{ color: "#ffd632" }}
+                        />
+                      ) : (
+                        <FaRegHeart
+                          className="wishlist-icon"
+                        />
+                      )}
+                    </button>
                   </div>
                 </div>
               );
