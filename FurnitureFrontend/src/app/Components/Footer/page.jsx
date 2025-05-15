@@ -6,15 +6,21 @@ import Image from 'next/image';
 // import 'aos/dist/aos.css';
 import { FaCcVisa, FaCcMastercard, FaCcAmex, FaWallet, FaLaptop, FaInstagramSquare, FaFacebookSquare, FaTwitterSquare,FaPinterest } from 'react-icons/fa';
 import Link from 'next/link';
-
-
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchCategories } from '@/app/redux/slice/categorySllice';
+import { generateSlug } from '@/app/utils/generate-slug';
 
 
 const Footer = () => {
   // useEffect(() => {
   //   AOS.init({ duration: 600 });
   // }, []);
+  const dispatch=useDispatch()
+const {categories} = useSelector((state) => state.category)
 
+useEffect(() => {
+  dispatch(fetchCategories())
+}, [dispatch]);
   return (
     <footer className="footer text-dark">
       <div className="container Footersection">
@@ -46,11 +52,11 @@ const Footer = () => {
            <div className='BestSellersSec'>
            <h3 className="heading">Our Best Sellers</h3>
             <ul className="list innerListGrid">
-              <li><Link href="/products/vintage">Vintage</Link></li>
-              <li><Link href="/products/hotpods">HotPods</Link></li>
-              <li><Link href="/products/armani">Armani</Link></li>
-              <li><Link href="/products/volcano">Volcano</Link></li>
-              <li><Link href="/products/gshock">GShock</Link></li>
+              {
+                categories?.slice(0, 5)?.map((category, index) => (
+                  <li key={index}><Link href={`/Pages/category/${generateSlug(category?.categoryName, category?._id)}`}>{category?.categoryName}</Link></li>
+                ))
+              }
             </ul>
            </div>
           </div>

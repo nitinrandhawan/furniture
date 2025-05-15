@@ -85,7 +85,7 @@ function getRandomCTA() {
             <div className="carousel-caption d-none d-md-block herosectionSec-caption animated fadeInUp">
               <h5>{banner?.title}</h5>
               <p>{banner?.description}</p>
-              <Link href={`/Pages/products/subcategory/${generateSlug(banner?.title)}/${banner?.subCategory?._id}`} className="btn btn-lg herosectionSec-btn">
+              <Link href={`/Pages/products/subcategory/${generateSlug(banner?.subCategory?.subCategoryName,banner?.subCategory?._id)}`} className="btn btn-lg herosectionSec-btn">
           {getRandomCTA()}  
               </Link>
             </div>

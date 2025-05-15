@@ -16,6 +16,7 @@ import toast from "react-hot-toast";
 import { axiosInstance } from "@/app/utils/axiosInstance";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart, AddToCartToServer } from "@/app/redux/slice/cartSlice";
+import { extractIdFromSlug } from "@/app/utils/generate-slug";
 
 const ImageCarousel = ({ product }) => {
   const mainSlider = useRef(null);
@@ -110,9 +111,10 @@ const Page = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const fetchProductDetails = async () => {
+   const productId= extractIdFromSlug(id);
     try {
       const response = await axiosInstance.get(
-        `/api/v1/product/get-single-product/${id}`
+        `/api/v1/product/get-single-product/${productId}`
       );
       const data = response?.data?.data;
       setProduct(data);

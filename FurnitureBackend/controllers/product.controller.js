@@ -244,6 +244,8 @@ const searchProducts = async (req, res) => {
         { productName: regex },
         { description: regex },
         { brand: regex },
+        {weight: regex },
+        {material: regex },
       ];
     }
     if (category) {

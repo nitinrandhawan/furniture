@@ -11,14 +11,18 @@ import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addToWishlist,
+  addToWishlistToLocal,
   getWishlistFromServer,
+  loadWishlistFromLocalStorage,
+  removeFromWishlistToLocal,
   removeFromWishlistToServer,
 } from "@/app/redux/slice/wislistSlice";
 import toast from "react-hot-toast";
 import { axiosInstance } from "@/app/utils/axiosInstance";
+import { generateSlug } from "@/app/utils/generate-slug";
 
 const Page = ({ products }) => {
-  const [wishlistedProductId, setWishlistedProductId] = useState(null);
+
   const router = useRouter();
   const priceRanges = [
     { label: "Under ₹500", priceMin: 0, priceMax: 500 },
@@ -32,7 +36,7 @@ const Page = ({ products }) => {
   const categories = useSelector((state) => state.category.categories);
   const materials = useSelector((state) => state.product.materials);
   const { wishlist } = useSelector((state) => state.wishlist);
-
+  const { user } = useSelector((state) => state.auth);
   const handleSortChange = (e) => {
     const sortValue = e.target.value;
     router.push(`/Pages/products/search?sortBy=${sortValue}`);
@@ -43,21 +47,29 @@ const Page = ({ products }) => {
     );
 
     if (exist) {
-      dispatch(removeFromWishlistToServer(productId));
+      if (user && user?.email) {
+        dispatch(removeFromWishlistToServer(productId));
+      } else {
+        dispatch(removeFromWishlistToLocal(productId));
+      }
     } else {
-      try {
-        const response = await axiosInstance.post(
-          "/api/v1/wishlist/add-to-wishlist",
-          {
-            productId,
+      if (user && user?.email) {
+        try {
+          const response = await axiosInstance.post(
+            "/api/v1/wishlist/add-to-wishlist",
+            {
+              productId,
+            }
+          );
+          if (response.status === 201) {
+            dispatch(addToWishlist(product));
           }
-        );
-        if (response.status === 201) {
-          dispatch(addToWishlist(product));
+        } catch (error) {
+          console.log("Error adding to wishlist:", error);
+          toast.error("Failed to add to wishlist. Please try again.");
         }
-      } catch (error) {
-        console.log("Error adding to wishlist:", error);
-        toast.error("Failed to add to wishlist. Please try again.");
+      } else {
+        dispatch(addToWishlistToLocal(product));
       }
     }
   };
@@ -65,7 +77,11 @@ const Page = ({ products }) => {
   useEffect(() => {
     dispatch(fetchCategories());
     dispatch(fetchMaterials());
+    if(user && user?.email){
     dispatch(getWishlistFromServer());
+    }else{
+      dispatch(loadWishlistFromLocalStorage());
+    }
   }, []);
   return (
     <>
@@ -227,7 +243,7 @@ const Page = ({ products }) => {
                     style={{ position: "relative" }}
                   >
                     <Link
-                      href={`/Pages/products/${item._id}`}
+                      href={`/Pages/products/${generateSlug(item?.productName,item._id)}`}
                       className="product-link"
                     >
                       <Image

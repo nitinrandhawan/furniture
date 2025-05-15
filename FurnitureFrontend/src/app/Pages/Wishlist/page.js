@@ -16,6 +16,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   getWishlistFromServer,
   loadWishlistFromLocalStorage,
+  removeFromWishlistToLocal,
   removeFromWishlistToServer,
 } from "@/app/redux/slice/wislistSlice";
 import { NoItem } from "@/app/utils/NoItem";
@@ -25,7 +26,12 @@ const Page = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
   const hanldeRemoveWishlist = (productId) => {
-    dispatch(removeFromWishlistToServer(productId));
+    if (user && user?.email){
+
+      dispatch(removeFromWishlistToServer(productId));
+    }else{
+      dispatch(removeFromWishlistToLocal(productId));
+    }
   };
 
   useEffect(() => {

@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchCategories } from "@/app/redux/slice/categorySllice";
 import { fetchMaterials } from "@/app/redux/slice/productSlice";
 import { useRouter } from "next/navigation";
+import { addToWishlist, addToWishlistToLocal, getWishlistFromServer, loadWishlistFromLocalStorage, removeFromWishlistToLocal, removeFromWishlistToServer } from "@/app/redux/slice/wislistSlice";
 
 const Page = () => {
   const [wishlistedProductId, setWishlistedProductId] = useState(null);
@@ -43,6 +44,8 @@ const Page = () => {
   const categories = useSelector((state) => state.category.categories);
   const materials = useSelector((state) => state.product.materials);
   const params = new URLSearchParams();
+  const { wishlist } = useSelector((state) => state.wishlist);
+    const { user } = useSelector((state) => state.auth);
   const fetchProducts = async (id) => {
     try {
       if (query) params.append("query", query);
@@ -72,11 +75,47 @@ const Page = () => {
     const sortValue = e.target.value;
     router.push(`/Pages/products/search?sortBy=${sortValue}`);
   };
+const handleWishlist = async (productId, product) => {
+    const exist = wishlist?.products?.some(
+      (item) => item._id.trim() === productId.trim()
+    );
 
+    if (exist) {
+      if (user && user?.email) {
+        dispatch(removeFromWishlistToServer(productId));
+      } else {
+        dispatch(removeFromWishlistToLocal(productId));
+      }
+    } else {
+      if (user && user?.email) {
+        try {
+          const response = await axiosInstance.post(
+            "/api/v1/wishlist/add-to-wishlist",
+            {
+              productId,
+            }
+          );
+          if (response.status === 201) {
+            dispatch(addToWishlist(product));
+          }
+        } catch (error) {
+          console.log("Error adding to wishlist:", error);
+          toast.error("Failed to add to wishlist. Please try again.");
+        }
+      } else {
+        dispatch(addToWishlistToLocal(product));
+      }
+    }
+  };
   useEffect(() => {
     fetchProducts();
   }, [searchParams.toString()]);
   useEffect(() => {
+     if (user && user?.email) {
+          dispatch(getWishlistFromServer());
+        } else {
+          dispatch(loadWishlistFromLocalStorage());
+        }
     if (!categories.length) dispatch(fetchCategories());
   if (!materials.length) dispatch(fetchMaterials());
   }, []);
@@ -327,6 +366,7 @@ const Page = () => {
                         width={300}
                         height={300}
                       />
+                      </Link>
                       <div className="product-details">
                         <h3>{item.productName}</h3>
                         <div className="product-price-section">
@@ -341,16 +381,24 @@ const Page = () => {
                       {/* Wishlist Button */}
                       <button
                         className="wishlist-btn"
-                        onClick={(e) => toggleWishlist(e, item.id)}
+                        onClick={(e) => {
+                        e.stopPropagation();
+                        handleWishlist(item?._id, item);
+                      }}
                         aria-label="Add to Wishlist"
                       >
-                        {wishlistedProductId === item.id ? (
-                          <FaHeart className="wishlist-icon red" />
-                        ) : (
-                          <FaRegHeart className="wishlist-icon" />
-                        )}
+                        {wishlist?.products?.some(
+                                               (product) => product._id === item._id
+                                             ) ? (
+                                               <FaHeart
+                                                 className="wishlist-icon"
+                                                 style={{ color: "#ffd632" }}
+                                               />
+                                             ) : (
+                                               <FaRegHeart className="wishlist-icon" />
+                                             )}
                       </button>
-                    </Link>
+                  
                   </div>
                 </div>
               );

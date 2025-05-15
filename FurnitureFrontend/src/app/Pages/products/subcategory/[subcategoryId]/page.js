@@ -6,7 +6,7 @@ import { FaHeart } from "react-icons/fa";
 import { FaRegHeart } from "react-icons/fa6";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
-import { extractIdFromSlug } from "@/app/utils/generate-slug";
+import { extractIdFromSlug, generateSlug } from "@/app/utils/generate-slug";
 import { axiosInstance } from "@/app/utils/axiosInstance";
 import { NoItem } from "@/app/utils/NoItem";
 import { useDispatch, useSelector } from "react-redux";
@@ -17,6 +17,8 @@ import {
   addToWishlist,
   addToWishlistToLocal,
   getWishlistFromServer,
+  loadWishlistFromLocalStorage,
+  removeFromWishlistToLocal,
   removeFromWishlistToServer,
 } from "@/app/redux/slice/wislistSlice";
 
@@ -53,7 +55,7 @@ const Page = () => {
   const categories = useSelector((state) => state.category.categories);
   const materials = useSelector((state) => state.product.materials);
   const { wishlist } = useSelector((state) => state.wishlist);
-const {user}=useSelector((state)=>state.auth)
+  const { user } = useSelector((state) => state.auth);
   const router = useRouter();
   const handleSortChange = (e) => {
     const sortValue = e.target.value;
@@ -69,31 +71,30 @@ const {user}=useSelector((state)=>state.auth)
     );
 
     if (exist) {
-      if(user && user?.email){
+      if (user && user?.email) {
         dispatch(removeFromWishlistToServer(productId));
-      }else{
-        dispatch(addToWishlistToLocal(product));
+      } else {
+        dispatch(removeFromWishlistToLocal(productId));
       }
     } else {
-      if(user && user?.email){
-         try {
-        const response = await axiosInstance.post(
-          "/api/v1/wishlist/add-to-wishlist",
-          {
-            productId,
+      if (user && user?.email) {
+        try {
+          const response = await axiosInstance.post(
+            "/api/v1/wishlist/add-to-wishlist",
+            {
+              productId,
+            }
+          );
+          if (response.status === 201) {
+            dispatch(addToWishlist(product));
           }
-        );
-        if (response.status === 201) {
-          dispatch(addToWishlist(product));
+        } catch (error) {
+          console.log("Error adding to wishlist:", error);
+          toast.error("Failed to add to wishlist. Please try again.");
         }
-      } catch (error) {
-        console.log("Error adding to wishlist:", error);
-        toast.error("Failed to add to wishlist. Please try again.");
+      } else {
+        dispatch(addToWishlistToLocal(product));
       }
-      }
-     else{
-        dispatch(addToWishlist(product));
-     }
     }
   };
   useEffect(() => {
@@ -103,7 +104,11 @@ const {user}=useSelector((state)=>state.auth)
         behavior: "smooth",
       });
     }
-    dispatch(getWishlistFromServer());
+    if (user && user?.email) {
+      dispatch(getWishlistFromServer());
+    } else {
+      dispatch(loadWishlistFromLocalStorage());
+    }
     if (!categories.length) dispatch(fetchCategories());
     if (!materials.length) dispatch(fetchMaterials());
   }, []);
@@ -288,35 +293,34 @@ const {user}=useSelector((state)=>state.auth)
                     style={{ position: "relative" }}
                   >
                     <Link
-                      href={`/Pages/products/${item?._id}`}
+                      href={`/Pages/products/${generateSlug(item?.productName, item?._id)}`}
                       className="product-link"
                     >
-                    <Image
-                      className="product-image"
-                      src={item?.images[0] || "/images/placeholder.png"}
-                      alt="product-image"
-                      width={300}
-                      height={300}
-                    />
-                    <div className="product-details">
-                      <h3>{item.productName}</h3>
-                      <div className="product-price-section">
-                        <p className="final-price">₹{item?.finalPrice}</p>
-                        <p className="price">
-                          <del>₹{item?.price}</del>
-                        </p>
-                        <p className="discount">{item?.discount}% OFF</p>
+                      <Image
+                        className="product-image"
+                        src={item?.images[0] || "/images/placeholder.png"}
+                        alt="product-image"
+                        width={300}
+                        height={300}
+                      />
+                      <div className="product-details">
+                        <h3>{item.productName}</h3>
+                        <div className="product-price-section">
+                          <p className="final-price">₹{item?.finalPrice}</p>
+                          <p className="price">
+                            <del>₹{item?.price}</del>
+                          </p>
+                          <p className="discount">{item?.discount}% OFF</p>
+                        </div>
                       </div>
-                    </div>
-</Link>
+                    </Link>
                     {/* Wishlist Button */}
                     <button
                       className="wishlist-btn"
-                                   onClick={(e) => {
-                e.stopPropagation(); 
-                handleWishlist(item?._id, item);
-              }}
-
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleWishlist(item?._id, item);
+                      }}
                       aria-label="Add to Wishlist"
                     >
                       {wishlist?.products?.some(
@@ -327,9 +331,7 @@ const {user}=useSelector((state)=>state.auth)
                           style={{ color: "#ffd632" }}
                         />
                       ) : (
-                        <FaRegHeart
-                          className="wishlist-icon"
-                        />
+                        <FaRegHeart className="wishlist-icon" />
                       )}
                     </button>
                   </div>

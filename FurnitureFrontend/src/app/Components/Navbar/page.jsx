@@ -33,6 +33,8 @@ import {
   setCartFromLocalStorage,
 } from "@/app/redux/slice/cartSlice";
 import { getWishlistFromServer } from "@/app/redux/slice/wislistSlice";
+import { generateSlug } from "@/app/utils/generate-slug";
+import { useRouter } from "next/navigation";
 
 const dropdownContentprev = {
   Furniture: {
@@ -128,21 +130,27 @@ const Navbar = () => {
   function formatToDropdownContent(apiData) {
     const dropdownContent = {};
 
-    apiData.forEach((categoryData) => {
-      const categoryName =
-        categoryData.categories[0]?.categoryName || "Unnamed Category";
+    apiData.forEach((categoryData, index) => {
+      const category = { name: categoryData?.name, _id: categoryData?._id } || {
+        name: "Unnamed Category",
+        _id: 1,
+      };
+  
+      const columns =
+        categoryData.subCategories?.map((subCat) => {
+          const products =
+            subCat.products?.slice(0, 5)?.map((prod) => prod) || {};
+          console.log("zzzzzzzzzz", ...products);
 
-      const columns = categoryData.subCategories.map((subCat) => {
-        const productNames = subCat.products.map((prod) => prod.productName);
-        return [subCat.name, ...productNames]; // First item is subcategory name
-      });
+          return [{ name: subCat.name, _id: subCat._id }, ...products];
+        }) || [];
 
-      dropdownContent[categoryName] = {
-        title: `${categoryName} Collection`,
+      dropdownContent[category.name] = {
+        title: `${category.name} Collection`,
+        link: category._id,
         columns,
       };
     });
-
     return dropdownContent;
   }
 
@@ -168,7 +176,9 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [dropdownContent, setDropdownContent] = useState(dropdownContentprev);
+  const [searchValue, setSearchValue] = useState("");
   const dispatch = useDispatch();
+  const router = useRouter();
   const handleMouseEnter = (navItem) => {
     setActiveDropdown(navItem);
   };
@@ -182,10 +192,14 @@ const Navbar = () => {
   const { wishlist } = useSelector((state) => state.wishlist);
   const fetchDropdownContent = async () => {
     try {
-      const reponse = await axiosInstance.get(
+      const response = await axiosInstance.get(
         "/api/v1/category/get-categories-with-subcategories-and-products"
       );
-      const formattedContent = await formatToDropdownContent(reponse.data.data);
+
+      const formattedContent = await formatToDropdownContent(
+        response.data.data
+      );
+    
       setDropdownContent(formattedContent);
     } catch (error) {
       console.log("Error fetching dropdown content:", error);
@@ -193,6 +207,19 @@ const Navbar = () => {
     }
   };
 
+  const handleSearchKeyDown = (e) => {
+    console.log("key", e);
+    
+  if (e.key === 'Enter') {
+    const query =searchValue.trim();
+    if (query) {
+      router.push(`/Pages/products/search?query=${query}`);
+    }
+  }
+};
+const handleSearchChange = (e) => {
+  router.push(`/Pages/products/search?query=${searchValue}`);
+}
   useEffect(() => {
     fetchDropdownContent();
     dispatch(verifyUser());
@@ -203,7 +230,7 @@ const Navbar = () => {
 
     if (user && user?.email) {
       dispatch(fetchCartItems());
-          dispatch(getWishlistFromServer());
+      dispatch(getWishlistFromServer());
     } else {
       if (typeof window !== "undefined") {
         const cartData = localStorage.getItem("cart");
@@ -254,9 +281,12 @@ const Navbar = () => {
               <input
                 type="text"
                 className="form-control"
-                placeholder="Search Products, Colors & More .."
+                placeholder=" Search for products and related keywords…"
+                onKeyDown={handleSearchKeyDown}
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
               />
-              <span className="input-group-text bg-white">
+              <span className="input-group-text bg-white" onClick={handleSearchChange} style={{ cursor: 'pointer' }}>
                 <FaSearch className="helpline" />
               </span>
             </div>
@@ -336,7 +366,10 @@ const Navbar = () => {
                   onMouseEnter={() => handleMouseEnter(navItem)}
                   onMouseLeave={handleMouseLeave}
                 >
-                  <Link className="nav-link" href="#">
+                  <Link
+                    className="nav-link"
+                    href={`/Pages/products/${dropdownContent[navItem].link}`}
+                  >
                     {navItem} <IoIosArrowDown />
                   </Link>
                   {activeDropdown === navItem && (
@@ -345,26 +378,42 @@ const Navbar = () => {
                       onMouseEnter={() => setActiveDropdown(navItem)}
                       onMouseLeave={handleMouseLeave}
                     >
-                      <h4>{dropdownContent[navItem].title}</h4>
+                      <Link
+                        href={`/Pages/category/${generateSlug(
+                          dropdownContent[navItem].title,
+                          dropdownContent[navItem].link
+                        )}`}
+                      >
+                        <h4>{dropdownContent[navItem].title}</h4>
+                      </Link>
                       <div className="dropdown-grid">
                         {dropdownContent[navItem].columns.map(
                           (column, colIndex) => (
                             <div className="dropdown-column" key={colIndex}>
                               {column.map((item, itemIndex) =>
                                 itemIndex === 0 ? (
-                                  <span
-                                    className="dropdown-item first-dropdown-item"
-                                    key={itemIndex}
+                                  <Link
+                                  key={itemIndex}
+                                    href={`/Pages/products/subcategory/${generateSlug(
+                                      item?.name,
+                                      item?._id
+                                    )}`}
                                   >
-                                    {item}
-                                  </span>
+                                    {" "}
+                                    <span
+                                      className="dropdown-item first-dropdown-item"
+                                      key={itemIndex}
+                                    >
+                                      {item?.name}
+                                    </span>
+                                  </Link>
                                 ) : (
                                   <Link
-                                    href="/Pages/Category"
+                                    href={`/Pages/products/${item._id}`}
                                     className="dropdown-item"
                                     key={itemIndex}
                                   >
-                                    {item}
+                                    {item?.productName}
                                   </Link>
                                 )
                               )}
@@ -376,31 +425,32 @@ const Navbar = () => {
                   )}
                 </li>
               ))}
-              <li className="nav-item">
-                <Link className="nav-link" href="/Pages/products">
-                  Furnishing
-                </Link>
-              </li>
+              {}
               <li className="nav-item">
                 <Link className="nav-link" href="/Pages/All-category">
                   All Category
                 </Link>
               </li>
-              <li className="nav-item">
-                <Link className="nav-link" href="#">
-                  Lamps & Lighting
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" href="#">
-                  Luxury
-                </Link>
-              </li>
-              <li className="nav-item">
+              {dropdownContent &&
+                Object.keys(dropdownContent).length > 0 &&
+                dropdownContent[Object.keys(dropdownContent)[0]]?.columns?.[0]
+                  ?.slice(1, 4)
+                  ?.map((product, index) => (
+                    <li className="nav-item" key={product._id || index}>
+                      <Link
+                        className="nav-link"
+                        href={`/Pages/products/${product?._id}`}
+                      >
+                        {product?.productName}
+                      </Link>
+                    </li>
+                  ))}
+
+              {/* <li className="nav-item">
                 <Link className="nav-link" href="#">
                   Modular
                 </Link>
-              </li>
+              </li> */}
             </ul>
           </div>
         </nav>
@@ -460,11 +510,14 @@ const Navbar = () => {
         </div>
 
         {/* Second Row - Search */}
+        
         <div className="topbar-search">
           <input
             type="search"
             className="form-control"
             placeholder="Search..."
+            onChange={(e) => setSearchValue(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
           />
         </div>
 

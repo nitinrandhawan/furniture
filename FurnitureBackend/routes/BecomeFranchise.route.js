@@ -8,4 +8,5 @@ const router=Router();
 router.post("/create-franchise",createFranchise);
 router.get("/get-all-franchises",verifyAdmin,getAllFranchises);
 router.delete("/delete-franchise/:id",verifyAdmin,deleteFranchise);
+
 export default router;

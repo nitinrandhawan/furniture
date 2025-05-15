@@ -61,9 +61,28 @@ const wishlistSlice = createSlice({
     },
     addToWishlistToLocal: (state, action) => {
       const product = action.payload;
-      console.log("product", state.wishlist);
-
+         if (!state.wishlist || !Array.isArray(state.wishlist.products)) {
+        state.wishlist = { products: [] };
+      }
       state.wishlist.products.push(product);
+      if (typeof window !== "undefined") {
+        localStorage.setItem(
+          "wishlist",
+          JSON.stringify(state.wishlist.products)
+        );
+      }
+    },
+    removeFromWishlistToLocal: (state, action) => {
+      const productId = action.payload;
+
+      if (!state.wishlist || !Array.isArray(state.wishlist.products)) {
+        state.wishlist = { products: [] };
+      }
+
+      state.wishlist.products = state.wishlist.products.filter(
+        (item) => item._id !== productId
+      );
+
       if (typeof window !== "undefined") {
         localStorage.setItem(
           "wishlist",
@@ -139,6 +158,7 @@ export const {
   clearWishlist,
   loadWishlistFromLocalStorage,
   addToWishlistToLocal,
+  removeFromWishlistToLocal,
 } = wishlistSlice.actions;
 
 export default wishlistSlice.reducer;

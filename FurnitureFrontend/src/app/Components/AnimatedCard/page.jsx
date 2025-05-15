@@ -6,17 +6,53 @@ import { RiHeartAddFill } from "react-icons/ri";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchFeaturedProducts } from "@/app/redux/slice/productSlice";
+import { addToWishlist, addToWishlistToLocal, loadWishlistFromLocalStorage, removeFromWishlistToLocal, removeFromWishlistToServer } from "@/app/redux/slice/wislistSlice";
+import { generateSlug } from "@/app/utils/generate-slug";
 
 export default function Products() {
   const [isLiked, setIsLiked] = useState(false);
-
-  const handleClick = () => {
-    setIsLiked(!isLiked);
-  };
   const dispatch = useDispatch();
+  const {wishlist} = useSelector((state) => state.wishlist);
+  const { user } = useSelector((state) => state.auth);
+
+
+   const handleWishlist = async (productId, product) => {
+    const exist = wishlist?.products?.some(
+      (item) => item._id.trim() === productId.trim()
+    );
+
+    if (exist) {
+      if (user && user?.email) {
+        dispatch(removeFromWishlistToServer(productId));
+      } else {
+        dispatch(removeFromWishlistToLocal(productId));
+      }
+    } else {
+      if (user && user?.email) {
+        try {
+          const response = await axiosInstance.post(
+            "/api/v1/wishlist/add-to-wishlist",
+            {
+              productId,
+            }
+          );
+          if (response.status === 201) {
+            dispatch(addToWishlist(product));
+          }
+        } catch (error) {
+          console.log("Error adding to wishlist:", error);
+          toast.error("Failed to add to wishlist. Please try again.");
+        }
+      } else {
+        dispatch(addToWishlistToLocal(product));
+      }
+    }
+  };
+
   const productData = useSelector((state) => state.product.featuredProducts);
   useEffect(() => {
     dispatch(fetchFeaturedProducts());
+    dispatch(loadWishlistFromLocalStorage())
   }, []);
   
   return (
@@ -25,12 +61,8 @@ export default function Products() {
         <div className={`container mt-4 ${styles.productContainer}`}>
           <div className="row row-cols-2   row-cols-sm-3 row-cols-md-5 g-4">
             {productData?.map((product, index) => (
-              <Link
-                href={`/Pages/products/id`}
-                key={index}
-                className="product-link"
-              >
-                <div className="col">
+             
+                <div className="col" key={product._id ?? index}>
                   <div
                     className={`card AniCardSec h-100 shadow-sm ${styles.productCard}`}
                   >
@@ -45,6 +77,11 @@ export default function Products() {
                       <div
                         className={`carousel-inner ${styles.productCarouselInner}`}
                       >
+                         <Link
+                href={`/Pages/products/${generateSlug(product.productName,product._id)}`}
+                key={index}
+                className="product-link"
+              >
                         {product.images?.map((image, index) => (
                           <div
                             className={`carousel-item ${
@@ -64,6 +101,7 @@ export default function Products() {
                             </p>
                           </div>
                         ))}
+                        </Link>
                       </div>
                       {product.images.length > 1 && (
                         <>
@@ -98,8 +136,13 @@ export default function Products() {
                     <div className="wishlistIconSec">
                       <RiHeartAddFill
                         className="fs-light"
-                        style={{ color: isLiked ? "red" : "white" }}
-                        onClick={handleClick}
+                      style={{
+  color: wishlist?.products?.some((p) => p._id === product._id)
+    ? "red" 
+    : "white" 
+}}
+                    
+                        onClick={()=> handleWishlist(product._id, product)}
                       />
                     </div>
                     <div
@@ -156,7 +199,7 @@ export default function Products() {
                     </div>
                   </div>
                 </div>
-              </Link>
+             
             ))}
           </div>
         </div>

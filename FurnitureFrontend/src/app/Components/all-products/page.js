@@ -7,29 +7,80 @@ import { FaHeart } from "react-icons/fa";
 import { FaRegHeart } from "react-icons/fa6";
 import Image from "next/image";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchProducts } from "@/app/redux/slice/productSlice";
+import { fetchMaterials, fetchProducts } from "@/app/redux/slice/productSlice";
 import {
   addToWishlist,
+  addToWishlistToLocal,
   addToWishlistToServer,
+  getWishlistFromServer,
+  loadWishlistFromLocalStorage,
+  removeFromWishlistToLocal,
+  removeFromWishlistToServer,
 } from "@/app/redux/slice/wislistSlice";
+import toast from "react-hot-toast";
+import { axiosInstance } from "@/app/utils/axiosInstance";
+import { fetchCategories } from "@/app/redux/slice/categorySllice";
 
 const Page = () => {
-  const [wishlistedProductId, setWishlistedProductId] = useState(null);
-
-  const toggleWishlist = (productId) => {
-    setWishlistedProductId((prevId) =>
-      prevId === productId ? null : productId
-    ); // Toggle wishlist state
-  };
-
+  const { wishlist } = useSelector((state) => state.wishlist);
+  const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const products = useSelector((state) => state.product.products);
-  const handleWishlist = (item) => {
-    dispatch(addToWishlistToServer(item?._id));
-    toggleWishlist();
+  const categories = useSelector((state) => state.category.categories);
+    const materials = useSelector((state) => state.product.materials);
+      const handleSortChange = (e) => {
+    const sortValue = e.target.value;
+    router.push(`/Pages/products/search?sortBy=${sortValue}`);
   };
+  const handleWishlist = async (productId, product) => {
+    const exist = wishlist?.products?.some(
+      (item) => item._id.trim() === productId.trim()
+    );
+
+    if (exist) {
+      if (user && user?.email) {
+        dispatch(removeFromWishlistToServer(productId));
+      } else {
+        dispatch(removeFromWishlistToLocal(productId));
+      }
+    } else {
+      if (user && user?.email) {
+        try {
+          const response = await axiosInstance.post(
+            "/api/v1/wishlist/add-to-wishlist",
+            {
+              productId,
+            }
+          );
+          if (response.status === 201) {
+            dispatch(addToWishlist(product));
+          }
+        } catch (error) {
+          console.log("Error adding to wishlist:", error);
+          toast.error("Failed to add to wishlist. Please try again.");
+        }
+      } else {
+        dispatch(addToWishlistToLocal(product));
+      }
+    }
+  };
+const priceRanges = [
+    { label: "Under ₹500", priceMin: 0, priceMax: 500 },
+    { label: "₹500 - ₹1,000", priceMin: 500, priceMax: 1000 },
+    { label: "₹1,000 - ₹2,000", priceMin: 1000, priceMax: 2000 },
+    { label: "₹2,000 - ₹10,000", priceMin: 2000, priceMax: 10000 },
+    { label: "₹10,000 - ₹30,000", priceMin: 10000, priceMax: 30000 },
+    { label: "Above ₹30,000", priceMin: 30000, priceMax: Infinity },
+  ];
   useEffect(() => {
     dispatch(fetchProducts());
+      dispatch(fetchCategories());
+        dispatch(fetchMaterials());
+    if (user && user?.email) {
+      dispatch(getWishlistFromServer());
+    } else {
+      dispatch(loadWishlistFromLocalStorage());
+    }
   }, []);
 
   return (
@@ -50,21 +101,18 @@ const Page = () => {
                     Price
                   </button>
                   <ul className="dropdown-menu">
-                    <li>
-                      <Link className="dropdown-item" href="#">
-                        Under $50
-                      </Link>
-                    </li>
-                    <li>
-                      <a className="dropdown-item" href="#">
-                        $50 - $100
-                      </a>
-                    </li>
-                    <li>
-                      <a className="dropdown-item" href="#">
-                        Above $100
-                      </a>
-                    </li>
+                     {priceRanges?.map((priceRange, index) => {
+                      return (
+                        <li key={index}>
+                          <Link
+                            className="dropdown-item"
+                            href={`/Pages/products/search?priceMin=${priceRange.priceMin}&priceMax=${priceRange.priceMax}`}
+                          >
+                            {priceRange.label}
+                          </Link>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
                 {/* Category Dropdown */}
@@ -76,21 +124,18 @@ const Page = () => {
                     Category
                   </button>
                   <ul className="dropdown-menu">
-                    <li>
-                      <a className="dropdown-item" href="#">
-                        Clothing
-                      </a>
-                    </li>
-                    <li>
-                      <a className="dropdown-item" href="#">
-                        Accessories
-                      </a>
-                    </li>
-                    <li>
-                      <a className="dropdown-item" href="#">
-                        Shoes
-                      </a>
-                    </li>
+                     {categories?.slice(0, 10)?.map((category, index) => {
+                      return (
+                        <li key={index}>
+                          <Link
+                            className="dropdown-item"
+                            href={`/Pages/products/search?category=${category?._id}`}
+                          >
+                            {category?.categoryName}
+                          </Link>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
                 {/* Material Dropdown */}
@@ -102,21 +147,18 @@ const Page = () => {
                     Material
                   </button>
                   <ul className="dropdown-menu">
-                    <li>
-                      <a className="dropdown-item" href="#">
-                        Cotton
-                      </a>
-                    </li>
-                    <li>
-                      <a className="dropdown-item" href="#">
-                        Leather
-                      </a>
-                    </li>
-                    <li>
-                      <a className="dropdown-item" href="#">
-                        Synthetic
-                      </a>
-                    </li>
+                    {materials?.slice(0, 10)?.map((material, index) => {
+                      return (
+                        <li key={index}>
+                          <Link
+                            className="dropdown-item"
+                            href={`/Pages/products/search?material=${material}`}
+                          >
+                            {material}
+                          </Link>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
                 {/* Size Dropdown */}
@@ -139,7 +181,7 @@ const Page = () => {
                   >
                     Discount
                   </button>
-                  <ul className="dropdown-menu">
+                   <ul className="dropdown-menu">
                     <li>
                       <Link
                         href="/Pages/products/search?discountMin=10"
@@ -169,13 +211,15 @@ const Page = () => {
               </div>
             </div>
             <div className="col-md-4">
-              <div className="filter-second">
+               <div className="filter-second">
                 <strong className="text-white">Sort By</strong>
-                <select className="form-select form-select-sm w-auto">
-                  <option value="relevance">Relevance</option>
-                  <option value="price_low_high">Price: Low to High</option>
-                  <option value="price_high_low">Price: High to Low</option>
-                  <option value="newest">Newest First</option>
+                <select
+                  className="form-select form-select-sm w-auto"
+                  onChange={handleSortChange}
+                >
+                  <option value="lowToHigh">Price: Low to High</option>
+                  <option value="highToLow">Price: High to Low</option>
+                  <option value="new">Newest First</option>
                 </select>
               </div>
             </div>
@@ -220,11 +264,19 @@ const Page = () => {
                     {/* Wishlist Button */}
                     <button
                       className="wishlist-btn"
-                      onClick={() => handleWishlist(item)}
+                       onClick={(e) => {
+                        e.stopPropagation();
+                        handleWishlist(item?._id, item);
+                      }}
                       aria-label="Add to Wishlist"
                     >
-                      {wishlistedProductId === item.id ? (
-                        <FaHeart className="wishlist-icon red" />
+                      {wishlist?.products?.some(
+                        (product) => product._id === item._id
+                      ) ? (
+                        <FaHeart
+                          className="wishlist-icon"
+                          style={{ color: "#ffd632" }}
+                        />
                       ) : (
                         <FaRegHeart className="wishlist-icon" />
                       )}

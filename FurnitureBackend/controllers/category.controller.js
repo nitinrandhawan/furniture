@@ -143,12 +143,11 @@ const getCategoriesWithSubcategoriesAndProducts = async (req, res) => {
 
     const categoryIds = topCategoryIds.map((item) => item._id);
 
-
-    const categories = await Category.find({ _id: { $in: categoryIds } }).select("_id categoryName");
+    const categories = await Category.find({ _id: { $in: categoryIds } }).select("_id categoryName").limit(6);
 
     const result = await Promise.all(
       categories.map(async (category) => {
-        const subCategories = await SubCategory.find({ Category: category._id });
+        const subCategories = await SubCategory.find({ Category: category._id }).limit(5);
   const subCategoriesWithProducts = await Promise.all(
           subCategories.map(async (sub) => {
             const products = await Product.find({ subCategory: sub._id }).select("productName _id");
@@ -161,9 +160,8 @@ const getCategoriesWithSubcategoriesAndProducts = async (req, res) => {
         );
 
         return {
-          categories,
           _id: category._id,
-          name: category.name,
+          name: category.categoryName,
           subCategories: subCategoriesWithProducts,
         };
       })
