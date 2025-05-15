@@ -6,12 +6,14 @@ import toast from "react-hot-toast";
 import { axiosInstance } from "@/app/utils/axiosInstance";
 import { generateSlug } from "@/app/utils/generate-slug";
 import Link from "next/link";
+import BannerSkeleton from "@/app/utils/skeleton/bannerSkeleton";
 
 const HeroCarousel = () => {
   useEffect(() => {
     import("bootstrap/dist/js/bootstrap.bundle.min.js"); // Bootstrap JS for carousel
   }, []);
   const [banner, setBanner] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const shopNowAlternatives = [
     "Buy Now",
     "Grab Yours",
@@ -28,6 +30,7 @@ function getRandomCTA() {
 }
   const fetchBanner = async () => {
     try {
+      setIsLoading(true);
       const response = await axiosInstance.get(
         "/api/v1/banner/get-all-banners"
       );
@@ -37,8 +40,10 @@ function getRandomCTA() {
         );
        
         setBanner(data);
+        setIsLoading(false);
       }
     } catch (error) {
+      setIsLoading(false);
       console.log("banner error", error);
       toast.error("Something went wrong while fetching the banner");
     }
@@ -47,6 +52,7 @@ function getRandomCTA() {
   useEffect(() => {
     fetchBanner();
   }, []);
+   if (isLoading) return <BannerSkeleton />;
   return (
     <div
       id="heroCarousel"
