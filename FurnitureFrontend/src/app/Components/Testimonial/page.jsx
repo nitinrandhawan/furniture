@@ -10,25 +10,25 @@ import "./testimonial.css";
 const testimonials = [
   {
     name: "Vishnu Sahu",
-    role: "Senior Software Engineer",
+    role: "Patna, Bihar",
     image: "/testimonial1.jpg",
-    message: "This product changed my life! I highly recommend it to everyone.",
+    message: "Absolutely in love with my new sofa! The craftsmanship is top-notch, and it perfectly complements my living room. Very comfortable and sturdy  highly recommend!",
   },
   {
     name: "Gaurov Panchal",
-    role: "Senior Software Engineer",
+    role: "Bawana, Delhi",
     image: "/testimonial2.jpg",
-    message: "A fantastic service with excellent customer support.",
+    message: "Received my dining set within a week. The finish is premium, and the installation was quick. Worth every penny!",
   },
   {
     name: "Mukesh Singh",
-    role: "Developer",
+    role: "Tankpur, Uttrakhand",
     image: "/testimonial4.jpg",
-    message: "Clean UI and fast performance. I'm truly impressed.",
+    message: "Finding stylish furniture at a good price was tough until I discovered this site. My bedroom looks like a Pinterest board now!",
   },
   {
     name: "Nitin Gupta",
-    role: "Backend Developer",
+    role: "Rohini, Delhi",
     image: "/profile.jpg",
     message: "Clean UI and fast performance. I'm truly impressed.",
   }
@@ -52,10 +52,10 @@ const TestimonialSlider = () => {
         {testimonials.map((t, index) => (
           <SwiperSlide key={index}>
             <div className="testimonial-card">
-              <img src={"../../public/testimonial1.jpg"} alt={t.name} className="testimonial-img" />
+              <img src={t.image} alt={t.name} className="testimonial-img" />
               <h3 className="text-light">{t.name}</h3>
-              <p className="role text-light">{t.role}</p>
-              <p className="message text-light">“{t.message}”</p>
+              <p className="role text-light ">{t.role}</p>
+              <p className="message text-light pb-3">“{t.message}”</p>
             </div>
           </SwiperSlide>
         ))}
