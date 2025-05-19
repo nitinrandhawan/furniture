@@ -16,6 +16,7 @@ import {
   setCartFromLocalStorage,
   updateQuantity,
 } from "@/app/redux/slice/cartSlice";
+import { axiosInstance } from "@/app/utils/axiosInstance";
 
 const CartSidebar = ({ isOpen, onClose, cartItems = [], onRemoveItem }) => {
   const router = useRouter();
@@ -61,12 +62,10 @@ const CartSidebar = ({ isOpen, onClose, cartItems = [], onRemoveItem }) => {
   const handleRemove = async (productId) => {
     if (user && user?.email) {
       try {
-        const response = await axiosInstance.post(
-          "/api/v1/cart/remove-from-cart",
-          { productId: productId?._id }
-        );
-
+        const response=  await axiosInstance.post("/api/v1/cart/remove-from-cart", { productId: productId?._id });
+     
         dispatch(removeFromCart({ productId: productId?._id }));
+    
       } catch (error) {
         console.log("error", error?.response?.data.message || error.message);
       }

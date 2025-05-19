@@ -196,7 +196,7 @@
   z-index: 99;
   display: none;
   position: absolute;
-  bottom: -120px;
+  bottom: -100px;
   left: 0;
   padding: 0px 5px;
   right: 0;
@@ -224,6 +224,7 @@
   background-color: #7665A0;
   border: none;
   padding: 5px;
+  margin-bottom: 5px;
 }
 
 @keyframes fadeIn {
@@ -278,8 +279,4 @@
   .card-title {
     font-size: small;
   }
-
-   
-
-
 }

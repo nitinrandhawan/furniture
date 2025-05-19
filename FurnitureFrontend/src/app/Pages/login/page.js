@@ -15,21 +15,21 @@ const Page = () => {
   const [password, setPassword] = useState("");
   const dispatch = useDispatch();
   const router = useRouter();
-  const handleLogin = async(e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     try {
-    const result =  await dispatch(
+      const result = await dispatch(
         loginUser({
           email: loginInput,
           password: password,
         })
       )
-      if(loginUser.fulfilled.match(result)){
+      if (loginUser.fulfilled.match(result)) {
         toast.success("Login successful!");
         setLoginInput("");
         setPassword("");
         router.push("/");
-      }else{
+      } else {
         toast.error(result.payload.message);
       }
     } catch (error) {
@@ -66,23 +66,24 @@ const Page = () => {
                 <div className="furniture-input-group email-with-button">
                   <input
                     type="text"
-                    placeholder="Enter Mobile Number Or Email Id"
+                    placeholder="Enter your Email"
                     className=" form-input mb-2"
                     value={loginInput}
                     onChange={(e) => setLoginInput(e.target.value)}
                     required
                   />
-                  <div style={{ position: "relative" }}>
+                  <div className="position-relative mb-2">
                     <input
                       type={showPassword ? "text" : "password"}
+                      className="form-control pe-5"
                       placeholder="Enter Password"
-                      className="form-input mb-2 pr-10 w-full"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
                     />
                     <div
-                      className="absolute right-3 top-2.5 cursor-pointer text-gray-600"
+                      className="position-absolute top-50 end-0 translate-middle-y me-3"
+                      style={{ cursor: "pointer" }}
                       onClick={() => setShowPassword((prev) => !prev)}
                     >
                       {showPassword ? <FaEyeSlash /> : <FaEye />}
@@ -95,7 +96,9 @@ const Page = () => {
                   >
                     Continue
                   </button>
-                  <Link href="/Pages/forgot-password">forgot password</Link>
+                   <div className="mt-3">
+                  <Link href="/Pages/forgot-password" className="text-success ">forgot password</Link>
+                  </div>
                 </div>
 
                 {/*            */}

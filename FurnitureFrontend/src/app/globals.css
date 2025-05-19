@@ -96,6 +96,9 @@ a {
   color: #000000c9;
   margin: 0;
 }
+.themeColor{
+  background: #5b3917 !important;; 
+}
 
 
 .product-price-section {
