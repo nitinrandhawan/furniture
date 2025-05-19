@@ -22,7 +22,7 @@
 
   .testimonial-card {
     background:transparent;
-    padding: 2rem;
+     padding:5px;
     border-radius: 20px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     text-align: center;
@@ -30,8 +30,9 @@
   }
   
   .testimonial-img {
-    width:100vw;
-    height: 200px;
+    /* width:100vw; */
+    margin-top: 10px;
+    height: 100px;
     border-radius: 50%;
     object-fit: contain;
     margin-bottom: 1rem;
