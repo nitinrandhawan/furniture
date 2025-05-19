@@ -143,9 +143,9 @@ const sentResetPasswordMail = async (email, myToken, id) => {
         <h2>Hello,</h2>
         <p>We received a request to reset your password. Click the link below to set a new password:</p>
   
-        <a href="${process.env.BASE_URL}/reset-password/${id}/${myToken}" >${
+        <a href="${process.env.BASE_URL}/Pages/reset-password/${id}/${myToken}" >${
           process.env.BASE_URL
-        }/reset-password/${id}/${myToken}</a>
+        }/Pages/reset-password/${id}/${myToken}</a>
         <p><strong>Note:</strong> This link will expire after a short time for your security.</p>
         <p style="color: red;"><strong>Do not share this email or link with anyone.</strong> If you didn’t request a password reset, please ignore this email or contact support.</p>
       </div>

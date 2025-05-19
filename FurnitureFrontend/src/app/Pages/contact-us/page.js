@@ -8,6 +8,8 @@ import { IoIosMailOpen } from "react-icons/io";
 import { FaLocationDot } from "react-icons/fa6";
 import { IoCall } from "react-icons/io5";
 import { FaInstagramSquare, FaFacebookSquare, FaTwitterSquare, FaPinterest } from 'react-icons/fa';
+import { axiosInstance } from '@/app/utils/axiosInstance'
+import toast from 'react-hot-toast'
 
 const Page = () => {
     const [formData, setFormData] = useState({
@@ -24,17 +26,35 @@ const Page = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const form = e.target;
-        if (!form.checkValidity()) {
-            e.stopPropagation();
-        } else {
-            console.log('Submitted:', formData);
-        }
-        setValidated(true);
+    const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const payload = {
+      fullName: formData.name,
+      email: formData.email,
+      subject: formData.subject,
+      message: formData.message,
     };
 
+    try {
+      const response = await axiosInstance.post(
+        "/api/v1/contact/create-contact",
+        payload
+      );
+      if (response.status === 201) {
+        toast.success("Thank you for applying! We’ll be in touch soon.");
+        setFormData({
+          name: "",
+          email: "",
+          subject: "",
+          message: "",
+        });
+      }
+    } catch (err) {
+      console.error("Submission error:", err);
+      alert("Something went wrong. Please try again later.");
+    }
+  };
     return (
         <>
             <nav aria-label="breadcrumb" className="pretty-breadcrumb">

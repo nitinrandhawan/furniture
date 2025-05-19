@@ -29,6 +29,8 @@ export default function Profile() {
   const [orders, setOrders] = useState([]);
   const [email, setEmail] = useState("");
   const router = useRouter();
+
+  const dispatch=useDispatch()
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -64,15 +66,17 @@ export default function Profile() {
 
   const handleLogout = async () => {
     try {
-      await axiosInstance.get("/api/v1/auth/logout");
+   const response =   await axiosInstance.get("/api/v1/auth/logout");
+   if(response.status===200){
       dispatch(resetAuthState());
       dispatch(resetCartState());
       dispatch(resetWishlistState());
       toast.success("Logged out successfully");
+   }
       router.push("/");
     } catch (error) {
       console.log("Error logging out:", error);
-      toast.error("Failed to log out. Please try again.");
+      toast.error( error?.response?.data?.message || "Failed to log out. Please try again.");
     }
   };
   const triggerFileInput = () => {
@@ -109,6 +113,7 @@ export default function Profile() {
       toast.error(
         error?.response?.data?.message || "Failed to fetch profile details."
       );
+      
     }
   };
 

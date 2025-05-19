@@ -2,17 +2,21 @@
 import Image from "next/image";
 import Link from "next/link";
 import "./login.css";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import { loginUser } from "@/app/redux/slice/authSlice";
 import { useRouter } from "next/navigation";
+import { AddToCartToServer, safeJSONParse, setCartFromLocalStorage } from "@/app/redux/slice/cartSlice";
+import { loadWishlistFromLocalStorage } from "@/app/redux/slice/wislistSlice";
 const Page = () => {
   const [loginInput, setLoginInput] = useState("");
   const [loginError, setLoginError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
+  const {items}=useSelector((state)=>state.cart)
+  const {wishlist}=useSelector((state)=>state.wishlist)
   const dispatch = useDispatch();
   const router = useRouter();
   const handleLogin = async (e) => {
@@ -28,6 +32,8 @@ const Page = () => {
         toast.success("Login successful!");
         setLoginInput("");
         setPassword("");
+        dispatch(AddToCartToServer(items))
+
         router.push("/");
       } else {
         toast.error(result.payload.message);
@@ -37,6 +43,18 @@ const Page = () => {
       toast.error("Login failed. Please try again.");
     }
   };
+
+useEffect(()=>{
+ if (typeof window !== "undefined") {
+      const cartData = localStorage.getItem("cart");
+      const parsedCart = safeJSONParse(cartData);
+      if (parsedCart && Array.isArray(parsedCart)) {
+        dispatch(setCartFromLocalStorage(parsedCart));
+      }
+      dispatch(loadWishlistFromLocalStorage())
+    }
+},[])
+console.log("wishlist",wishlist);
 
   return (
     <>

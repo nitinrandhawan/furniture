@@ -5,6 +5,8 @@ import './forgot.css';
 import Image from 'next/image';
 import Link from 'next/link';
 import logo from '@/app/Components/assets/logo.webp'
+import toast from 'react-hot-toast';
+import { axiosInstance } from '@/app/utils/axiosInstance';
 
 const Page = () => {
     const [email, setEmail] = useState('');
@@ -25,14 +27,20 @@ const Page = () => {
         }));
     };
 
-    const handleEmailSubmit = (e) => {
+    const handleEmailSubmit = async(e) => {
         e.preventDefault();
-        if (email) {
-            setMessage('OTP has been sent to your email.');
-            setStep(2);
-        } else {
-            setMessage('Please enter your email.');
-        }
+       if(!email){
+        toast.error('Please enter your email first');
+        return;
+       }
+       try {
+        await axiosInstance.post('/api/v1/auth/forgot-password', { email });
+        toast.success('Reset link sent to your email');
+        setEmail('');
+       } catch (error) {
+        console.log(error?.response?.data?.message || 'reset password failed');
+        toast.error(error?.response?.data?.message || 'Login password failed');
+       }
     };
 
     const handleOtpSubmit = (e) => {
@@ -72,7 +80,7 @@ const Page = () => {
                 <div className="auth-box rounded-4 shadow-lg">
                     <h2 className="text-center TitleSec fw-bold mb-4">Reset Password</h2> 
                     <p className="text-center text-muted mb-4">
-                        {step === 1 ? 'Enter your email to receive an OTP' :
+                        {step === 1 ? 'Enter your email to get a verification link.' :
                             step === 2 ? 'Enter the OTP sent to your email' :
                                 'Set your new password'}
                     </p>
@@ -86,7 +94,7 @@ const Page = () => {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />
-                            <button className="btn btn-dark w-100">Send OTP</button>
+                            <button className="btn btn-dark w-100">Send Link</button>
                         </form>
                     )}
 
