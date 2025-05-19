@@ -107,7 +107,7 @@ const TrackOrder = () => {
                     <div className="col-md-8">
                         <div className="table-responsive">
                             <table className="table table-hover align-middle m-0">
-                                <thead className="table-primary">
+                                <thead className="custom-thead">
                                     <tr>
                                         <th scope="col">Image</th>
                                         <th scope="col">Product Name</th>
@@ -140,6 +140,10 @@ const TrackOrder = () => {
                     </div>
                 </div>
             </div>
+
+
+
+
 
         </>
     );

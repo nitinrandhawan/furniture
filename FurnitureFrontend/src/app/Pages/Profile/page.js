@@ -11,15 +11,17 @@ import { axiosInstance } from "@/app/utils/axiosInstance";
 import { useDispatch, useSelector } from "react-redux";
 import { resetAuthState, verifyUser } from "@/app/redux/slice/authSlice";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { NoItem } from "@/app/utils/NoItem";
 import { resetCartState } from "@/app/redux/slice/cartSlice";
 import { resetWishlistState } from "@/app/redux/slice/wislistSlice";
+import MyOrder from "@/app/Components/ProfileComponent/MyOrder";
 
 export default function Profile() {
   const [activeTab, setActiveTab] = useState("profile");
   const [avatar, setAvatar] = useState("/User.jpg");
   const fileInputRef = useRef(null);
-const [name, setName] = useState("");
+  const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [pincode, setPincode] = useState("");
@@ -33,6 +35,14 @@ const [name, setName] = useState("");
       setAvatar(imageURL);
     }
   };
+  const searchParams = useSearchParams();
+  const order = searchParams.get('order');
+
+  useEffect(() => {
+    if (order == 'true') {
+      setActiveTab("orders")
+    }
+  }, [order]);
 
   const handleLogout = async () => {
     try {
@@ -41,7 +51,7 @@ const [name, setName] = useState("");
       dispatch(resetCartState())
       dispatch(resetWishlistState())
       toast.success("Logged out successfully");
-     router.push("/")
+      router.push("/")
     } catch (error) {
       console.log("Error logging out:", error);
       toast.error("Failed to log out. Please try again.");
@@ -65,15 +75,15 @@ const [name, setName] = useState("");
     }
   };
 
-  const fetchProfileDetails=async()=>{
+  const fetchProfileDetails = async () => {
     try {
-   const response =   await axiosInstance.get("/api/v1/auth/get-single-user");
-  const data = response?.data?.user;
-  setAddress(data?.address);
-  setPincode(data?.pincode);
-  setCity(data?.city);
-  setPhone(data?.phone);
-   setName(data?.name);
+      const response = await axiosInstance.get("/api/v1/auth/get-single-user");
+      const data = response?.data?.user;
+      setAddress(data?.address);
+      setPincode(data?.pincode);
+      setCity(data?.city);
+      setPhone(data?.phone);
+      setName(data?.name);
     } catch (error) {
       console.log("Error fetching profile details:", error);
       toast.error(
@@ -81,7 +91,7 @@ const [name, setName] = useState("");
       );
     }
   }
-  
+
   useEffect(() => {
     fetchProfileDetails()
     fetchOrderDetails();
@@ -90,270 +100,150 @@ const [name, setName] = useState("");
   const dataSubmit = (e) => {
     e.preventDefault();
   };
-
   const renderContent = () => {
     switch (activeTab) {
       case "profile":
         return <ProfileInfo />;
       case "orders":
-        return <Orders orders={orders} />;
+        return <Orders />;
       case "address":
         return (
           <Address
             address={address}
-            phone={phone}
+            setAddress={setAddress}
             pincode={pincode}
+            setPincode={setPincode}
             city={city}
-            name={name}
+            setCity={setCity}
+            dataSubmit={dataSubmit}
           />
         );
-      case "settings":
-        return <Settings />;
+      // case "settings":
+      //   return <Settings />;
       default:
         return null;
     }
   };
-  const dispatch = useDispatch();
-
-  const { user, loading } = useSelector((state) => state.auth);
-
-  useEffect(() => {
-    if (loading) return;
-    if (!user?.email) {
-      router.push("/Pages/login");
-    }
-  }, [user]);
-  useEffect(() => {
-    dispatch(verifyUser());
-  }, [dispatch]);
-
   return (
     <>
-      {loading ? (
-        <div>
-          <h1>Loading...</h1>
-        </div>
-      ) : (
-        <>
-          <Head>
-            <title>Admin Profile UI</title>
-          </Head>
-
-          <div className="container-fluid profile-layout">
-            <div className="row">
-              {/* Sidebar */}
-              <div className="col-md-3 sidebar p-4 text-white d-flex flex-column justify-content-between">
-                <div>
-                  <div className="text-center mb-4">
-                    <div className="profile-avatar-container">
-                      <Image
-                        src={avatar}
-                        alt="Avatar"
-                        width={90}
-                        height={90}
-                        className="rounded-circle profile-avatar mb-2"
-                      />
-                      <div className="change-icon" onClick={triggerFileInput}>
-                        +
-                      </div>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        ref={fileInputRef}
-                        style={{ display: "none" }}
-                        onChange={handleImageChange}
-                      />
-                    </div>
-                    <h6 className="mb-0">Mukesh Mahar</h6>
-                    <small>mukeshmahar00@gmail.com</small>
-                    <br />
-                    <small>Delhi India</small>
+      <Head>
+        <title>Admin Profile UI</title>
+      </Head>
+      <div className="container-fluid profile-layout">
+        {/* Mobile Top Navigation */}
+        <div className="row">
+          <div className="mobile-top-nav top-0 z-3">
+            <div className={`inner-top-bar ${activeTab === "profile" ? "btn-light text-dark" : "btn-outline-light"}`} onClick={() => setActiveTab("profile")}>
+              <FaUser />
+              Profile
+            </div>
+            <div className={`inner-top-bar ${activeTab === "orders" ? "btn-light text-dark" : "btn-outline-light"}`} onClick={() => setActiveTab("orders")}>
+              <FaShoppingBag />
+              Orders
+            </div>
+            <div className={`inner-top-bar ${activeTab === "address" ? "btn-light text-dark" : "btn-outline-light"}`} onClick={() => setActiveTab("address")}>
+              <FaMapMarkerAlt />
+              Address
+            </div>
+            {/* <div className={`inner-top-bar ${activeTab === "settings" ? "btn-light text-dark" : "btn-outline-light"}`} onClick={() => setActiveTab("settings")}>
+              <FaCog />
+              Settings
+            </div> */}
+          </div>
+          {/* Sidebar */}
+          <div className="col-md-3 sidebar">
+            <div>
+              <div className="text-center mb-4">
+                <div className="profile-avatar-container">
+                  <Image
+                    src={avatar}
+                    alt="Avatar"
+                    width={90}
+                    height={90}
+                    className="rounded-circle profile-avatar mb-2"
+                  />
+                  <div className="change-icon" onClick={triggerFileInput}>
+                    +
                   </div>
-
-                  <ul className="nav flex-column mt-4">
-                    <li
-                      className="nav-item"
-                      onClick={() => setActiveTab("profile")}
-                    >
-                      <a
-                        className={`nav-link ${
-                          activeTab === "profile" ? "active" : ""
-                        }`}
-                      >
-                        <FaUser /> Profile Info
-                      </a>
-                    </li>
-                    <li
-                      className="nav-item"
-                      onClick={() => setActiveTab("orders")}
-                    >
-                      <a
-                        className={`nav-link ${
-                          activeTab === "orders" ? "active" : ""
-                        }`}
-                      >
-                        <FaShoppingBag /> Orders
-                      </a>
-                    </li>
-                    <li
-                      className="nav-item"
-                      onClick={() => setActiveTab("address")}
-                    >
-                      <a
-                        className={`nav-link ${
-                          activeTab === "address" ? "active" : ""
-                        }`}
-                      >
-                        <FaMapMarkerAlt /> Address
-                      </a>
-                    </li>
-                    <li
-                      className="nav-item"
-                      onClick={() => setActiveTab("settings")}
-                    >
-                      <a
-                        className={`nav-link ${
-                          activeTab === "settings" ? "active" : ""
-                        }`}
-                      >
-                        <FaCog /> Settings
-                      </a>
-                    </li>
-                  </ul>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    ref={fileInputRef}
+                    style={{ display: "none" }}
+                    onChange={handleImageChange}
+                  />
                 </div>
-
-                <div className="text-center">
-                  <button
-                    className="btn btn-secondary  w-100 mt-4"
-                    onClick={handleLogout}
-                  >
-                    Logout
-                  </button>
-                </div>
+                <h6 className="mb-0">Mukesh Mahar</h6>
+                <small>mukeshmahar00@gmail.com</small><br />
+                <small>Delhi India</small>
               </div>
+              <ul className="nav flex-column mt-4">
+                <li className="nav-item" onClick={() => setActiveTab("profile")}>
+                  <a className={`nav-link ${activeTab === "profile" ? "active" : ""}`}>
+                    <FaUser /> Profile Info
+                  </a>
+                </li>
+                <li className="nav-item" onClick={() => setActiveTab("orders")}>
+                  <a className={`nav-link ${activeTab === "orders" ? "active" : ""}`}>
+                    <FaShoppingBag /> Orders
+                  </a>
+                </li>
+                <li className="nav-item" onClick={() => setActiveTab("address")}>
+                  <a className={`nav-link ${activeTab === "address" ? "active" : ""}`}>
+                    <FaCog />  Settings
+                  </a>
+                </li>
+                {/* <li className="nav-item" onClick={() => setActiveTab("settings")}>
+                  <a className={`nav-link ${activeTab === "settings" ? "active" : ""}`}>
+                    <FaCog /> Settings
+                  </a>
+                </li> */}
+              </ul>
 
-              {/* Main Content */}
-              <div className="col-md-9 p-4">
-                <div className="content-area">{renderContent()}</div>
-              </div>
+            </div>
+            <div className="text-center">
+
+              <button className=" btn-theme-bg  w-100 mt-4" onClick={handleLogout}>Logout</button>
             </div>
           </div>
-        </>
-      )}
+
+
+          {/* Main Content */}
+          <div className="col-md-9 p-4">
+            <div className="content-area">{renderContent()}</div>
+          </div>
+        </div>
+      </div>
     </>
   );
 }
-
 // Profile Info Component
 const ProfileInfo = () => (
   <div className="container">
-    <div className="m-5">
+    <div className="profile-profile-info">
       <h4 className="text-center text-secondary">Profile Info</h4>
       <ul className="list-group">
         <li className="list-group-item">
-          <strong>Email: </strong>
-          <span className="text-success">mukeshmahar00@gmail.com</span>
+          <strong>Email: </strong><span className="text-success">mukeshmahar00@gmail.com</span>
         </li>
         <li className="list-group-item">
-          <strong>Phone: </strong>
-          <span className="text-warning">7827433944</span>
+          <strong>Phone: </strong><span className="text-warning">7827433944</span>
         </li>
       </ul>
     </div>
   </div>
 );
-
 // Orders Component
-const Orders = ({ orders }) => (
-  <div className="d-flex flex-wrap">
-    {orders && orders.length > 0 ? (
-      orders.map((order) => (
-        <div
-          className="card ms-5 mt-3 "
-          style={{ maxWidth: "585px" }}
-          key={order._id}
-        >
-          <div className="row g-0">
-            <div className="col-md-4">
-              {order?.items?.map((item) => (
-                <Image
-                  key={item._id}
-                  src={item?.productId?.images?.[0]}
-                  width={100}
-                  height={100}
-                  className="img-fluid "
-                  alt="Order1"
-                />
-              ))}
-            </div>
-            <div className="col-md-8">
-              <div className="card-body">
-                <h5 className="card-title">{order?.productId?.productName}</h5>
-                <ul className="list-group">
-                  <b>Order No: {order?.orderUniqueId}</b>
-                  <li className="list-group-item">
-                    12345 - ₹5000 -{" "}
-                    <span className="text-success">{order?.orderStatus}</span>
-                  </li>
-                </ul>
-                <p className="card-text">This is a wider sofa.</p>
-                <p className="card-text">
-                  <small className="text-body-secondary">
-                    Last updated{" "}
-                    {new Date(order?.updatedAt).toLocaleString("en-IN", {
-                      hour: "numeric",
-                      minute: "numeric",
-                      hour12: true,
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </small>
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      ))
-    ) : (
-      <NoItem name={"Orders"} />
-    )}
-
-    {/* <div className="card ms-5 mt-3" style={{ maxWidth: "585px" }}>
-      <div className="row g-0">
-        <div className="col-md-4">
-          <Image src={pic2} className="img-fluid rounded-start" alt="Order2" />
-        </div>
-        <div className="col-md-8">
-          <div className="card-body">
-            <h5 className="card-title">Double Bed</h5>
-            <ul className="list-group">
-              <b>Order No: M-T1299</b>
-              <li className="list-group-item">
-                12345 - ₹5000 - <span className="text-warning">Pending</span>
-              </li>
-            </ul>
-            <p className="card-text">This is a double bed with supporting .</p>
-            <p className="card-text">
-              <small className="text-body-secondary">
-                Last updated 18 mins ago
-              </small>
-            </p>
-          </div>
-        </div>
-      </div>
-    </div> */}
-  </div>
+const Orders = () => (
+  <MyOrder />
 );
-
-// Address Component (UPDATED)
 const Address = ({
   name,
   phone,
   address,
   pincode,
   city,
- 
+
 }) => {
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({
@@ -390,11 +280,11 @@ const Address = ({
       pincode: pincode,
       city: city,
     });
-  },[])
+  }, [])
   return (
     <div className="container">
       <div className="card shadow p-4 mb-5">
-        <h4 className="mb-4 text-primary">Address Details</h4>
+        <h4 className="mb-4 text-secondary">Address Details</h4>
 
         {!editMode ? (
           <>
@@ -421,7 +311,7 @@ const Address = ({
               </table>
             </div>
             <div className="text-end">
-              <button className="btn btn-warning" onClick={handleEdit}>
+              <button className="btn btn-secondary" onClick={handleEdit}>
                 Edit Address
               </button>
             </div>
@@ -494,7 +384,7 @@ const Address = ({
             </div>
 
             <div className="mt-3 text-end">
-              <button type="submit" className="btn btn-success">
+              <button type="submit" className="btn btn-secondary">
                 Save Changes
               </button>
             </div>
@@ -505,73 +395,16 @@ const Address = ({
   );
 };
 
-// Settings Component
-// Settings Component
-const Settings = () => {
-  const [name, setName] = useState("Mukesh Mahar");
-  const [email, setEmail] = useState("mukeshmahar00@gmail.com");
-  const [phone, setPhone] = useState("7827433944");
-  const [password, setPassword] = useState("");
 
-  const handleSettingsSubmit = (e) => {
-    e.preventDefault();
-    console.log("Updated Account Settings:", { name, email, phone, password });
-    // Here you can call an API to save updated settings
-  };
 
-  return (
-    <div className="container">
-      <div className="card shadow p-4">
-        <h4 className="mb-4 text-primary">⚙️ Account Settings</h4>
-        <form onSubmit={handleSettingsSubmit}>
-          <div className="row">
-            <div className="col-md-6 mb-3">
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Full Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </div>
-            {/* <div className="col-md-6 mb-3">
-              <input
-                type="email"
-                className="form-control"
-                placeholder="Email Address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div> */}
-            <div className="col-md-6 mb-3">
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Phone Number"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required
-              />
-            </div>
-            <div className="col-md-12 mb-3">
-              <input
-                type="password"
-                className="form-control"
-                placeholder="New Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-          </div>
-          <div className="text-end">
-            <button type="submit" className="btn btn-success">
-              Update Password
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
+
+
+
+
+
+
+
+
+
+
+

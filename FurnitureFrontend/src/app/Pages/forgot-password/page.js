@@ -4,6 +4,7 @@ import './forgot.css';
 // import logo from '@/app/Components/assets/logo.webp';
 import Image from 'next/image';
 import Link from 'next/link';
+import logo from '@/app/Components/assets/logo.webp'
 
 const Page = () => {
     const [email, setEmail] = useState('');
@@ -61,14 +62,14 @@ const Page = () => {
         <div className="forgot-wrapper">
             <div className="left-panel d-none d-md-flex flex-column justify-content-center text-white p-5">
                 <div className="text-center">
-                    {/* <Image src={logo} alt="Logo" width={150} className="mb-4" /> */}
+                    <Image src={logo} alt="Logo" width={150} className="mb-4" />
                     <h1 className="display-5 fw-bold text-dark">MANMOHAN FURNITURES</h1>
                     <p className="lead mt-3 text-dark">Manage your business, export smartly.</p>
                     <p className="text-light opacity-75 text-dark">Secure, elegant password recovery experience.</p>
                 </div>
             </div>
             <div className="right-panel d-flex align-items-center justify-content-center p-4">
-                <div className="auth-box rounded-4 glass shadow-lg">
+                <div className="auth-box rounded-4 shadow-lg">
                     <h2 className="text-center TitleSec fw-bold mb-4">Reset Password</h2> 
                     <p className="text-center text-muted mb-4">
                         {step === 1 ? 'Enter your email to receive an OTP' :
@@ -128,7 +129,7 @@ const Page = () => {
                                     <i className={`bi ${showPassword.confirmPassword ? 'bi-eye-fill' : 'bi-eye-slash-fill'}`}></i>
                                 </span>
                             </div>
-                            <button className="btn btn-dark w-100">Reset Password</button>
+                            <button className="btn btn-dark  w-100">Reset Password</button>
                         </form>
                     )}
 
@@ -151,6 +152,7 @@ const Page = () => {
 };
 
 export default Page;
+
 
 
 

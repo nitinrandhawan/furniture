@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchCategories } from '@/app/redux/slice/categorySllice';
 import { generateSlug } from '@/app/utils/generate-slug';
+import { fetchProducts } from '@/app/redux/slice/productSlice';
 
 
 const Footer = () => {
@@ -17,9 +18,10 @@ const Footer = () => {
   // }, []);
   const dispatch=useDispatch()
 const {categories} = useSelector((state) => state.category)
-
+const {products}=useSelector((state)=>state.product)
 useEffect(() => {
   dispatch(fetchCategories())
+  dispatch(fetchProducts())
 }, [dispatch]);
   return (
     <footer className="footer text-dark">
@@ -50,7 +52,9 @@ useEffect(() => {
 
           <div className="col-md-3 col-6 mb-4">
            <div className='BestSellersSec'>
-           <h3 className="heading">Our Best Sellers</h3>
+           
+           <h3 className="heading">Our Categories</h3>
+
             <ul className="list innerListGrid">
               {
                 categories?.slice(0, 5)?.map((category, index) => (
@@ -63,15 +67,15 @@ useEffect(() => {
 
           <div className="col-md-3 col-6 mb-4">
            <div className='CategoriesSec'>
-           <h3 className="heading">Our Categories</h3>
+           <h3 className="heading">Our Best Sellers </h3>
             <ul className="list innerListGrid">
-              <li><Link href="/category/earbuds">Earbuds & Headphones</Link></li>
-              <li><Link href="/category/mobile-accessories">Mobile & Tablet Accessories</Link></li>
-              <li><Link href="/category/men-watches">Men Wrist Watch</Link></li>
-              <li><Link href="/category/women-watches">Women Wrist Watch</Link></li>
-              <li><Link href="/category/massagers">Portable Massagers</Link></li>
-              <li><Link href="/category/home-essentials">Home Essentials</Link></li>
-              <li><Link href="/category/everyday">Everyday Essentials</Link></li>
+              {
+                products?.slice(0,5)?.map((product)=>(
+                  <li key={product?._id}><Link href={`/Pages/products/${generateSlug(product?.productName,product?._id)}`}>{product?.productName}</Link></li>
+
+                ))
+              }
+              
             </ul>
            </div>
           </div>
@@ -99,11 +103,11 @@ useEffect(() => {
     <div className="paymentsec">
       <h4>We Accept</h4>
       <div className="d-flex gap-3 align-items-center">
-        <Link href="#" aria-label="Visa" style={{ color: "brown" }}><FaCcVisa className="fs-1" /></Link>
-        <Link href="#" aria-label="MasterCard" style={{ color: "darkblue" }}><FaCcMastercard className="fs-1" /></Link>
-        <Link href="#" aria-label="Amex" style={{ color: "green" }}><FaCcAmex className="fs-1" /></Link>
+        <Link href="#" aria-label="Visa" style={{ color: "brown" }}><FaCcVisa className="fs-1 text-success" /></Link>
+        <Link href="#" aria-label="MasterCard" style={{ color: "darkblue" }}><FaCcMastercard className="fs-1 text-warning" /></Link>
+        <Link href="#" aria-label="Amex" style={{ color: "green" }}><FaCcAmex className="fs-1 text-primary" /></Link>
         <Link href="#" aria-label="Wallet" style={{ color: "black" }}><FaWallet className="fs-1" /></Link>
-        <Link href="#" aria-label="Net Banking" style={{ color: "#5b3917" }}><FaLaptop className="fs-1" /></Link>
+        <Link href="#" aria-label="Net Banking" style={{ color: "#5b3917" }}><FaLaptop className="fs-1 text-info" /></Link>
       </div>
     </div>
 
@@ -112,16 +116,16 @@ useEffect(() => {
       <h4 style={{fontSize:'14px' , marginTop:'0.5rem' , marginBottom:'0'}}>Like what you see? Follow us here</h4>
       <div className="socialMediaSec justify-content-center d-flex gap-3">
         <Link href="https://www.instagram.com/manmohanfurnitures/#" target="_blank" aria-label="Instagram" className="instagramicon">
-          <FaInstagramSquare className="fs-1" />
+          <FaInstagramSquare className="fs-1 text-danger" />
         </Link>
         <Link href="https://www.facebook.com/ManmohanFurnitureshomedecor" target="_blank" aria-label="Facebook" className="facebookicon">
-          <FaFacebookSquare className="fs-1" />
+          <FaFacebookSquare className="fs-1 text-primary " />
         </Link>
         <Link href="https://x.com/i/flow/login?redirect_after_login=%2FManmohanMMF" target="_blank" aria-label="Twitter" className="twittericon">
           <FaTwitterSquare className="fs-1" />
         </Link>
         <a href="https://in.pinterest.com/manmohanfurnitures/" target="_blank" aria-label="Pinterest">
-          <FaPinterest className="fs-1" />
+          <FaPinterest className="fs-1 text-danger " />
         </a>
       </div>
     </div>

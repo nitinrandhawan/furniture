@@ -261,7 +261,7 @@ const handleSearchChange = (e) => {
               <Link className="nav-link" href="/Pages/franchise">
                 Become a Franchise
               </Link>
-              <Link className="nav-link" href="/Pages/TrackOrder">
+              <Link className="nav-link" href="/Pages/Profile?order=true">
                 Track Order
               </Link>
               <Link className="nav-link" href="/Pages/helpCenter">

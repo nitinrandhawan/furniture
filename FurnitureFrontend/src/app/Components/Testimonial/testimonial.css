@@ -7,7 +7,8 @@
   }
   .testimonialMainSec{
     background-image: url(../../../../public/testimonial5.jpeg);
-     height: 500px;
+     height: 100%;
+     background-repeat: round;
   }
   
   .swiper-initialized{
@@ -29,10 +30,10 @@
   }
   
   .testimonial-img {
-    width: 80px;
-    height: 80px;
+    width:100vw;
+    height: 200px;
     border-radius: 50%;
-    object-fit: cover;
+    object-fit: contain;
     margin-bottom: 1rem;
   }
   

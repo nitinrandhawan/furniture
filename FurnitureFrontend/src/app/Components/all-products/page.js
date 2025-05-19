@@ -20,6 +20,7 @@ import {
 import toast from "react-hot-toast";
 import { axiosInstance } from "@/app/utils/axiosInstance";
 import { fetchCategories } from "@/app/redux/slice/categorySllice";
+import { generateSlug } from "@/app/utils/generate-slug";
 
 const Page = () => {
   const { wishlist } = useSelector((state) => state.wishlist);
@@ -242,7 +243,7 @@ const priceRanges = [
                     className="product-card"
                     style={{ position: "relative" }}
                   >
-                    {/* <Link href={`/Pages/products/${item?.productId?._id}`} className="product-link"> */}
+                    <Link href={`/Pages/products/${generateSlug(item?.productName,item?._id)}`} className="product-link">
                     <Image
                       className="product-image"
                       src={item?.images[0] || "/images/placeholder.png"}
@@ -250,6 +251,7 @@ const priceRanges = [
                       width={300}
                       height={300}
                     />
+                    </Link>
                     <div className="product-details">
                       <h3>{item.productName}</h3>
                       <div className="product-price-section">

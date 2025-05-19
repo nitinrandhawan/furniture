@@ -48,6 +48,16 @@ body {
     background-color: var(--brown);
 }
 
+
+
+.custom-thead th {
+  background-color: #5b3917 !important;
+  color: white !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid #dee2e6 !important;
+}
+
+
 .topSec h3{
     background-color: var(--brown);
     text-align: center;

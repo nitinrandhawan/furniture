@@ -142,7 +142,7 @@ const Cart = () => {
                   className="rounded"
                 />
                 </Link>
-                <div className="flex-grow-1">
+                <div className="flex-grow-1 leftTextSec">
                   <h6 className="fw-semibold">{item?.name || item?.productId?.productName}</h6>
                   <p className="text-muted small mb-2">{item?.description}</p>
                   <div className="d-flex align-items-center justify-content-between gap-4">
