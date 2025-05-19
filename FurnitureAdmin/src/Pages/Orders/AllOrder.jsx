@@ -18,10 +18,9 @@ const AllOrder = () => {
   // Fetch orders
   const fetchOrders = async () => {
     try {
-      const response = await axiosInstance.get("/api/v1/checkout/get-order");
-      console.log("RESPONS:", response);
+      const response = await axiosInstance.get("/api/v1/order/get-all-orders");
       if (response.status === 200) {
-        setOrders(response?.data.order);
+        setOrders(response?.data.orders);
         setFilteredOrders(response?.data.orders);
       }
     } catch (error) {
@@ -44,8 +43,8 @@ const AllOrder = () => {
 
       if (confirmation.isConfirmed) {
         const body = { orderId: orderId };
-        const response = await postData(`api/orders/order-delete`, body);
-        if (response?.success === true) {
+        const response = await axiosInstance.delete(`/api/v1/order/delete-order/${orderId}`, body);
+        if (response?.status === 200) {
           setOrders((prevOrders) =>
             prevOrders.filter((order) => order._id !== orderId)
           );

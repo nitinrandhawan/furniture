@@ -213,7 +213,7 @@ const GetOrderById = async (req, res) => {
   try {
    
     const { id } = req.params;
-    const order = await Checkout.findById(id).populate("items.productId");
+    const order = await Checkout.findById(id).populate("items.productId userId");
     return res.status(200).json({ message: "Order found", order });
   } catch (error) {
     return res.status(500).json({ message: "Internal server error", error });
@@ -221,26 +221,33 @@ const GetOrderById = async (req, res) => {
 };
 const UpdateCheckout = async (req, res) => {
   try {
-    const user = req?.user;
-    if (user?.role !== "admin") {
-      return res
-        .status(403)
-        .json({
-          message: "Unauthorized ! Don't try to be smart you are not admin",
-        });
-    }
     const { id } = req.params;
     const { orderStatus, paymentStatus } = req.body || {};
     const checkout = await Checkout.findById(id);
     checkout.paymentStatus = paymentStatus ?? checkout.paymentStatus;
     checkout.orderStatus = orderStatus ?? checkout.orderStatus;
     await checkout.save();
+
+    return res.status(200).json({ message: "Checkout updated", checkout });
   } catch (error) {
     console.log("update checkout error", error);
 
     return res.status(500).json({ message: "Internal server error", error });
   }
 };  
+
+const DeleteOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = await Checkout.findByIdAndDelete(id);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+    return res.status(200).json({ message: "Order deleted successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error", error });
+  }
+}
 export {
   CreateCheckout,
   GetAllOrders,
@@ -248,4 +255,5 @@ export {
   verifyPayment,
   GetOrderById,
   UpdateCheckout,
+  DeleteOrder
 };
