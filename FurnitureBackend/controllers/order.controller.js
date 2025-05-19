@@ -199,7 +199,8 @@ const GetAllOrders = async (req, res) => {
 const GetSingleOrder = async (req, res) => {
   try {
     const user = req?.user;
-    const order = await Checkout.find({ userId: user?.id }).populate(
+    
+    const order = await Checkout.find({ userId: user?._id }).populate(
       "items.productId"
     );
     return res.status(200).json({ message: "Order found", order });

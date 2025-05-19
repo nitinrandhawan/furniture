@@ -35,7 +35,7 @@ const orderSchema = new mongoose.Schema(
       trim: true,
       default: "",
     },
-    user: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },

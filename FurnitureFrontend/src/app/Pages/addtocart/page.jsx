@@ -135,7 +135,7 @@ const Cart = () => {
                   className="text-decoration-none"
                 >
                 <Image
-                  src={item?.image || item?.productId?.images[0]}
+                  src={item?.image || item?.productId?.images[0] || "jsonholder.img"}
                   alt={item?.name || item?.productId?.productName}
                   width={180}
                   height={140}
@@ -156,7 +156,7 @@ const Cart = () => {
                         >
                           -
                         </button>
-                        <span>{item.quantity}</span>
+                        <span>{item?.quantity}</span>
                         <button
                           onClick={() =>
                             handleIncreaseQuantity(
@@ -171,10 +171,10 @@ const Cart = () => {
                       </div>
                     </div>
                     <div className="price-text">
-                      ₹{item?.finalPrice * item.quantity  || item.productId?.finalPrice * item.quantity}{" "}
-                      <del className="ms-2">₹{item?.price * item.quantity || item.productId?.price * item.quantity}</del>{" "}
+                      ₹{item?.finalPrice * item?.quantity  || item?.productId?.finalPrice * item?.quantity}{" "}
+                      <del className="ms-2">₹{item?.price * item?.quantity || item?.productId?.price * item?.quantity}</del>{" "}
                       <span className="themeColor ms-2">
-                        {item?.discount || item.productId?.discount}% OFF
+                        {item?.discount || item?.productId?.discount}% OFF
                       </span>
                     </div>
                   </div>

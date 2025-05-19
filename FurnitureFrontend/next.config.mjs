@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     images: {
-        domains: ['fakestoreapi.com',"res.cloudinary.com"],
+        domains: ['fakestoreapi.com',"res.cloudinary.com","picsum.photos"],
       },
 };
 

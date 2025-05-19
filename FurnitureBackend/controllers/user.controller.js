@@ -4,6 +4,7 @@ import crypto from "crypto";
 import nodemailer from "nodemailer";
 import bcrypt from "bcrypt";
 import mongoose from "mongoose";
+import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudinary.util.js";
 
 const cookieOptions = {
   httpOnly: true,

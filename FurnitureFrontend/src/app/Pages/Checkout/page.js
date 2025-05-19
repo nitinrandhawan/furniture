@@ -121,13 +121,16 @@ export default function Checkout() {
       payload.couponCode = cuppen;
     }
     try {
+     const toastId = toast.loading("Placing order...");
       if (paymentMethod === "COD") {
         const response = await axiosInstance.post(
           "/api/v1/order/create-checkout",
           payload
         );
-        if (response.data.success) {
+        if (response.status===200) {
+          toast.dismiss(toastId);
           toast.success("Order placed successfully!");
+          router.push("/Pages/Profile?order=true")
         }
       } else {
         const scriptLoaded = await loadRazorpayScript();

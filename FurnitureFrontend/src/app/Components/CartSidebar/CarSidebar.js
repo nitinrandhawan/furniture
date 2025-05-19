@@ -165,10 +165,10 @@ const CartSidebar = ({ isOpen, onClose, cartItems = [], onRemoveItem }) => {
                     key={index}
                   >
                     <Image
-                      src={item?.image || item?.productId?.images[0]}
+                      src={item?.image || item?.productId?.images[0] || "/placeholder.svg"}
                       width={130}
                       height={100}
-                      alt={item?.name || item?.productId?.productName}
+                      alt={item?.name || item?.productId?.productName || "Product"}
                       className="rounded"
                     />
                     <div className="flex-grow-1">

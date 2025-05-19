@@ -27,31 +27,49 @@ export default function Profile() {
   const [pincode, setPincode] = useState("");
   const [city, setCity] = useState("");
   const [orders, setOrders] = useState([]);
+  const [email, setEmail] = useState("");
   const router = useRouter();
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
       const imageURL = URL.createObjectURL(file);
       setAvatar(imageURL);
     }
+    const formData = new FormData();
+    formData.append("image", file);
+    try {
+      const response = await axiosInstance.put(
+        "/api/v1/auth/update-profile",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      toast.success("profile Updated successfully");
+    } catch (error) {
+      console.log("Error saving address:", error);
+      toast.error("Failed to save address. Please try again.");
+    }
   };
   const searchParams = useSearchParams();
-  const order = searchParams.get('order');
+  const order = searchParams.get("order");
 
   useEffect(() => {
-    if (order == 'true') {
-      setActiveTab("orders")
+    if (order == "true") {
+      setActiveTab("orders");
     }
   }, [order]);
 
   const handleLogout = async () => {
     try {
       await axiosInstance.get("/api/v1/auth/logout");
-      dispatch(resetAuthState())
-      dispatch(resetCartState())
-      dispatch(resetWishlistState())
+      dispatch(resetAuthState());
+      dispatch(resetCartState());
+      dispatch(resetWishlistState());
       toast.success("Logged out successfully");
-      router.push("/")
+      router.push("/");
     } catch (error) {
       console.log("Error logging out:", error);
       toast.error("Failed to log out. Please try again.");
@@ -84,16 +102,18 @@ export default function Profile() {
       setCity(data?.city);
       setPhone(data?.phone);
       setName(data?.name);
+      setEmail(data?.email);
+      setAvatar(data?.profileImage)
     } catch (error) {
       console.log("Error fetching profile details:", error);
       toast.error(
         error?.response?.data?.message || "Failed to fetch profile details."
       );
     }
-  }
+  };
 
   useEffect(() => {
-    fetchProfileDetails()
+    fetchProfileDetails();
     fetchOrderDetails();
   }, []);
 
@@ -103,19 +123,17 @@ export default function Profile() {
   const renderContent = () => {
     switch (activeTab) {
       case "profile":
-        return <ProfileInfo />;
+        return <ProfileInfo email={email} phone={phone} />;
       case "orders":
         return <Orders />;
       case "address":
         return (
           <Address
             address={address}
-            setAddress={setAddress}
+            phone={phone}
             pincode={pincode}
-            setPincode={setPincode}
             city={city}
-            setCity={setCity}
-            dataSubmit={dataSubmit}
+            name={name}
           />
         );
       // case "settings":
@@ -133,15 +151,36 @@ export default function Profile() {
         {/* Mobile Top Navigation */}
         <div className="row">
           <div className="mobile-top-nav top-0 z-3">
-            <div className={`inner-top-bar ${activeTab === "profile" ? "btn-light text-dark" : "btn-outline-light"}`} onClick={() => setActiveTab("profile")}>
+            <div
+              className={`inner-top-bar ${
+                activeTab === "profile"
+                  ? "btn-light text-dark"
+                  : "btn-outline-light"
+              }`}
+              onClick={() => setActiveTab("profile")}
+            >
               <FaUser />
               Profile
             </div>
-            <div className={`inner-top-bar ${activeTab === "orders" ? "btn-light text-dark" : "btn-outline-light"}`} onClick={() => setActiveTab("orders")}>
+            <div
+              className={`inner-top-bar ${
+                activeTab === "orders"
+                  ? "btn-light text-dark"
+                  : "btn-outline-light"
+              }`}
+              onClick={() => setActiveTab("orders")}
+            >
               <FaShoppingBag />
               Orders
             </div>
-            <div className={`inner-top-bar ${activeTab === "address" ? "btn-light text-dark" : "btn-outline-light"}`} onClick={() => setActiveTab("address")}>
+            <div
+              className={`inner-top-bar ${
+                activeTab === "address"
+                  ? "btn-light text-dark"
+                  : "btn-outline-light"
+              }`}
+              onClick={() => setActiveTab("address")}
+            >
               <FaMapMarkerAlt />
               Address
             </div>
@@ -174,23 +213,42 @@ export default function Profile() {
                   />
                 </div>
                 <h6 className="mb-0">Mukesh Mahar</h6>
-                <small>mukeshmahar00@gmail.com</small><br />
-                <small>Delhi India</small>
+                <small>{email ?? "Email not found"}</small>
+                <br />
+                <small>{phone ?? "Phone not found"}</small>
               </div>
               <ul className="nav flex-column mt-4">
-                <li className="nav-item" onClick={() => setActiveTab("profile")}>
-                  <a className={`nav-link ${activeTab === "profile" ? "active" : ""}`}>
+                <li
+                  className="nav-item"
+                  onClick={() => setActiveTab("profile")}
+                >
+                  <a
+                    className={`nav-link ${
+                      activeTab === "profile" ? "active" : ""
+                    }`}
+                  >
                     <FaUser /> Profile Info
                   </a>
                 </li>
                 <li className="nav-item" onClick={() => setActiveTab("orders")}>
-                  <a className={`nav-link ${activeTab === "orders" ? "active" : ""}`}>
+                  <a
+                    className={`nav-link ${
+                      activeTab === "orders" ? "active" : ""
+                    }`}
+                  >
                     <FaShoppingBag /> Orders
                   </a>
                 </li>
-                <li className="nav-item" onClick={() => setActiveTab("address")}>
-                  <a className={`nav-link ${activeTab === "address" ? "active" : ""}`}>
-                    <FaCog />  Settings
+                <li
+                  className="nav-item"
+                  onClick={() => setActiveTab("address")}
+                >
+                  <a
+                    className={`nav-link ${
+                      activeTab === "address" ? "active" : ""
+                    }`}
+                  >
+                    <FaCog /> Settings
                   </a>
                 </li>
                 {/* <li className="nav-item" onClick={() => setActiveTab("settings")}>
@@ -199,14 +257,16 @@ export default function Profile() {
                   </a>
                 </li> */}
               </ul>
-
             </div>
             <div className="text-center">
-
-              <button className=" btn-theme-bg  w-100 mt-4" onClick={handleLogout}>Logout</button>
+              <button
+                className=" btn-theme-bg  w-100 mt-4"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
             </div>
           </div>
-
 
           {/* Main Content */}
           <div className="col-md-9 p-4">
@@ -218,33 +278,26 @@ export default function Profile() {
   );
 }
 // Profile Info Component
-const ProfileInfo = () => (
+const ProfileInfo = ({ email, phone }) => (
   <div className="container">
     <div className="profile-profile-info">
       <h4 className="text-center text-secondary">Profile Info</h4>
       <ul className="list-group">
         <li className="list-group-item">
-          <strong>Email: </strong><span className="text-success">mukeshmahar00@gmail.com</span>
+          <strong>Email: </strong>
+          <span className="text-success">{email ?? "Email not found"}</span>
         </li>
         <li className="list-group-item">
-          <strong>Phone: </strong><span className="text-warning">7827433944</span>
+          <strong>Phone: </strong>
+          <span className="text-warning">{phone ?? "Phone not found"}</span>
         </li>
       </ul>
     </div>
   </div>
 );
 // Orders Component
-const Orders = () => (
-  <MyOrder />
-);
-const Address = ({
-  name,
-  phone,
-  address,
-  pincode,
-  city,
-
-}) => {
+const Orders = () => <MyOrder />;
+const Address = ({ name, phone, address, pincode, city }) => {
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -280,7 +333,7 @@ const Address = ({
       pincode: pincode,
       city: city,
     });
-  }, [])
+  }, []);
   return (
     <div className="container">
       <div className="card shadow p-4 mb-5">
@@ -311,7 +364,7 @@ const Address = ({
               </table>
             </div>
             <div className="text-end">
-              <button className="btn btn-secondary" onClick={handleEdit}>
+              <button className="btn btn-danger" onClick={handleEdit}>
                 Edit Address
               </button>
             </div>
@@ -384,7 +437,7 @@ const Address = ({
             </div>
 
             <div className="mt-3 text-end">
-              <button type="submit" className="btn btn-secondary">
+              <button type="submit" className="btn btn-success">
                 Save Changes
               </button>
             </div>
@@ -394,17 +447,3 @@ const Address = ({
     </div>
   );
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
