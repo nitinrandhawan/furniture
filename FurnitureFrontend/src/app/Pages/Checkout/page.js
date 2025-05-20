@@ -121,16 +121,16 @@ export default function Checkout() {
       payload.couponCode = cuppen;
     }
     try {
-     const toastId = toast.loading("Placing order...");
+      const toastId = toast.loading("Placing order...");
       if (paymentMethod === "COD") {
         const response = await axiosInstance.post(
           "/api/v1/order/create-checkout",
           payload
         );
-        if (response.status===200) {
+        if (response.status === 200) {
           toast.dismiss(toastId);
           toast.success("Order placed successfully!");
-          router.push("/Pages/Profile?order=true")
+          router.push("/Pages/Profile?order=true");
         }
       } else {
         const scriptLoaded = await loadRazorpayScript();
@@ -151,7 +151,8 @@ export default function Checkout() {
           currency: "INR",
           name: "Manmohan Furniture",
           description: "Payment for your Manmohan Furniture order",
-          image: "https://res.cloudinary.com/dfet60ou1/image/upload/v1747043182/logo_nkf8jp.webp",
+          image:
+            "https://res.cloudinary.com/dfet60ou1/image/upload/v1747043182/logo_nkf8jp.webp",
           order_id: data?.checkout?.paymentInfo?.orderId,
           handler: async function (response) {
             try {
@@ -227,258 +228,276 @@ export default function Checkout() {
     setTotalAmount(total);
   }, [total]);
 
-    useEffect(() => {
-        if(!user || !user?.email){
-            router.push("/login");
-        }
-    }, []);
+  useEffect(() => {
+    if (!loading && (!user || !user.email)) {
+      router.push("/Pages/login");
+    }
+  }, [user, loading, router]);
+
+ if (loading || !user || !user.email) {
+  return <h1>Loading...</h1>;
+}
   return (
-    <section>
-      <nav aria-label="breadcrumb" className="prettyBreadcrumb">
-        <div className="container">
-          <ol className="breadcrumb align-items-center mt-3">
-            <li className="breadcrumb-item">
-              <Link href="/">
-                <span className="breadcrumbLink">Home</span>
-              </Link>
-            </li>
-            <li className="breadcrumb-item active" aria-current="page">
-              Checkout
-            </li>
-          </ol>
-        </div>
-      </nav>
+    <>
+      {!loading ? (
+        <section>
+          <nav aria-label="breadcrumb" className="prettyBreadcrumb">
+            <div className="container">
+              <ol className="breadcrumb align-items-center mt-3">
+                <li className="breadcrumb-item">
+                  <Link href="/">
+                    <span className="breadcrumbLink">Home</span>
+                  </Link>
+                </li>
+                <li className="breadcrumb-item active" aria-current="page">
+                  Checkout
+                </li>
+              </ol>
+            </div>
+          </nav>
 
-      <div className="checkoutsec">
-        <div className="checkouttitle text-center">
-          <p>Checkouts</p>
-        </div>
-
-        <div className="container">
-          <div className="row">
-            {/* Shipping Form */}
-            <div className="col-lg-7">
-              <div className="shippingForm">
-                <p>Shipping Address</p>
-                <hr />
-                <form>
-                  <div>
-                    <label>Name*</label>
-                    <input
-                      type="text"
-                      placeholder="Full Name"
-                      className="form-control"
-                      value={address.name}
-                      onChange={(e) =>
-                        setAddress({ ...address, name: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label>Phone*</label>
-                    <input
-                      type="text"
-                      placeholder="Phone Number"
-                      className="form-control"
-                      value={address.phone}
-                      onChange={(e) =>
-                        setAddress({ ...address, phone: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label>Address*</label>
-                    <input
-                      type="text"
-                      placeholder="Address"
-                      className="form-control"
-                      value={address.street}
-                      onChange={(e) =>
-                        setAddress({ ...address, street: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                  <div className="row">
-                    <div className="col-md-6">
-                      <label>City*</label>
-                      <input
-                        type="text"
-                        placeholder="City"
-                        className="form-control"
-                        value={address.city}
-                        onChange={(e) =>
-                          setAddress({ ...address, city: e.target.value })
-                        }
-                        required
-                      />
-                      <label>State*</label>
-                      <input
-                        type="text"
-                        placeholder="State"
-                        className="form-control"
-                        value={address.state}
-                        onChange={(e) =>
-                          setAddress({ ...address, state: e.target.value })
-                        }
-                        required
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <label>Country*</label>
-                      <input
-                        type="text"
-                        placeholder="Country"
-                        className="form-control"
-                        value={address.country}
-                        onChange={(e) =>
-                          setAddress({ ...address, country: e.target.value })
-                        }
-                        required
-                      />
-                      <label>Pin Code*</label>
-                      <input
-                        type="text"
-                        placeholder="Pin Code"
-                        className="form-control"
-                        value={address.pincode}
-                        onChange={(e) =>
-                          setAddress({ ...address, pincode: e.target.value })
-                        }
-                        required
-                      />
-                    </div>
-                  </div>
-                </form>
-              </div>
+          <div className="checkoutsec">
+            <div className="checkouttitle text-center">
+              <p>Checkouts</p>
             </div>
 
-            {/* Order Summary */}
-            <div className="col-lg-5 orderSummary">
-              <p>Order Summary</p>
-              <hr />
-              <div className="table-responsive">
-                {items && items.length > 0 ? (
-                  items.map((item, index) => (
-                    <table
-                      className="table table-bordered text-center align-middle"
-                      key={index}
-                    >
-                      <thead className="tabletheme">
-                        <tr>
-                          <th>Image</th>
-                          <th>Product</th>
-                          <th>Price</th>
-                          <th>Quantity</th>
-                          <th>Total</th>
-                        </tr>
-                      </thead>
+            <div className="container">
+              <div className="row">
+                {/* Shipping Form */}
+                <div className="col-lg-7">
+                  <div className="shippingForm">
+                    <p>Shipping Address</p>
+                    <hr />
+                    <form>
+                      <div>
+                        <label>Name*</label>
+                        <input
+                          type="text"
+                          placeholder="Full Name"
+                          className="form-control"
+                          value={address.name}
+                          onChange={(e) =>
+                            setAddress({ ...address, name: e.target.value })
+                          }
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label>Phone*</label>
+                        <input
+                          type="text"
+                          placeholder="Phone Number"
+                          className="form-control"
+                          value={address.phone}
+                          onChange={(e) =>
+                            setAddress({ ...address, phone: e.target.value })
+                          }
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label>Address*</label>
+                        <input
+                          type="text"
+                          placeholder="Address"
+                          className="form-control"
+                          value={address.street}
+                          onChange={(e) =>
+                            setAddress({ ...address, street: e.target.value })
+                          }
+                          required
+                        />
+                      </div>
+                      <div className="row">
+                        <div className="col-md-6">
+                          <label>City*</label>
+                          <input
+                            type="text"
+                            placeholder="City"
+                            className="form-control"
+                            value={address.city}
+                            onChange={(e) =>
+                              setAddress({ ...address, city: e.target.value })
+                            }
+                            required
+                          />
+                          <label>State*</label>
+                          <input
+                            type="text"
+                            placeholder="State"
+                            className="form-control"
+                            value={address.state}
+                            onChange={(e) =>
+                              setAddress({ ...address, state: e.target.value })
+                            }
+                            required
+                          />
+                        </div>
+                        <div className="col-md-6">
+                          <label>Country*</label>
+                          <input
+                            type="text"
+                            placeholder="Country"
+                            className="form-control"
+                            value={address.country}
+                            onChange={(e) =>
+                              setAddress({
+                                ...address,
+                                country: e.target.value,
+                              })
+                            }
+                            required
+                          />
+                          <label>Pin Code*</label>
+                          <input
+                            type="text"
+                            placeholder="Pin Code"
+                            className="form-control"
+                            value={address.pincode}
+                            onChange={(e) =>
+                              setAddress({
+                                ...address,
+                                pincode: e.target.value,
+                              })
+                            }
+                            required
+                          />
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+
+                {/* Order Summary */}
+                <div className="col-lg-5 orderSummary">
+                  <p>Order Summary</p>
+                  <hr />
+                  <div className="table-responsive">
+                    {items && items.length > 0 ? (
+                      items.map((item, index) => (
+                        <table
+                          className="table table-bordered text-center align-middle"
+                          key={index}
+                        >
+                          <thead className="tabletheme">
+                            <tr>
+                              <th>Image</th>
+                              <th>Product</th>
+                              <th>Price</th>
+                              <th>Quantity</th>
+                              <th>Total</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>
+                                <Image
+                                  src={
+                                    item?.productId?.images?.[0] ||
+                                    "/images/placeholder.png"
+                                  }
+                                  alt={
+                                    item?.productId?.productName || "Product"
+                                  }
+                                  height={100}
+                                  width={100}
+                                />
+                              </td>
+                              <td>{item?.productId?.productName}</td>
+                              <td>{item?.productId?.finalPrice}</td>
+                              <td>{item?.quantity}</td>
+                              <td>
+                                {item?.productId?.finalPrice * item?.quantity}
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      ))
+                    ) : (
+                      <NoItem name="cart item" />
+                    )}
+                  </div>
+
+                  <div>
+                    <table className="table table-bordered mt-4 checkout-total-table">
                       <tbody>
                         <tr>
                           <td>
-                            <Image
-                              src={
-                                item?.productId?.images?.[0] ||
-                                "/images/placeholder.png"
-                              }
-                              alt={item?.productId?.productName || "Product"}
-                              height={100}
-                              width={100}
-                            />
+                            <strong>Sub-Total</strong>
                           </td>
-                          <td>{item?.productId?.productName}</td>
-                          <td>{item?.productId?.finalPrice}</td>
-                          <td>{item?.quantity}</td>
+                          <td>{totalAmount}</td>
+                        </tr>
+                        <tr>
                           <td>
-                            {item?.productId?.finalPrice * item?.quantity}
+                            <strong>Shipping</strong>
+                          </td>
+                          <td>{totalAmount > 500 ? "Free" : 50}</td>
+                        </tr>
+                        <tr className="table-total-row">
+                          <td>
+                            <strong>Total</strong>
+                          </td>
+                          <td>
+                            <strong>
+                              {totalAmount + (totalAmount > 500 ? 0 : 50)}
+                            </strong>
                           </td>
                         </tr>
                       </tbody>
                     </table>
-                  ))
-                ) : (
-                  <NoItem name="cart item" />
-                )}
-              </div>
+                  </div>
 
-              <div>
-                <table className="table table-bordered mt-4 checkout-total-table">
-                  <tbody>
-                    <tr>
-                      <td>
-                        <strong>Sub-Total</strong>
-                      </td>
-                      <td>{totalAmount}</td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <strong>Shipping</strong>
-                      </td>
-                      <td>{totalAmount > 500 ? "Free" : 50}</td>
-                    </tr>
-                    <tr className="table-total-row">
-                      <td>
-                        <strong>Total</strong>
-                      </td>
-                      <td>
-                        <strong>
-                          {totalAmount + (totalAmount > 500 ? 0 : 50)}
-                        </strong>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+                  <input
+                    type="text"
+                    placeholder="Enter Voucher Code"
+                    className="form-control my-2"
+                    value={cuppen}
+                    onChange={(e) => setCuppen(e.target.value)}
+                  />
+                  <button
+                    className="btn btn-brown w-100 mb-3"
+                    onClick={handleApply}
+                  >
+                    Apply
+                  </button>
 
-              <input
-                type="text"
-                placeholder="Enter Voucher Code"
-                className="form-control my-2"
-                value={cuppen}
-                onChange={(e) => setCuppen(e.target.value)}
-              />
-              <button
-                className="btn btn-brown w-100 mb-3"
-                onClick={handleApply}
-              >
-                Apply
-              </button>
+                  {hasAttempt &&
+                    (isSuccess ? (
+                      <p className="text-success">
+                        Voucher is Successfully Applied
+                      </p>
+                    ) : (
+                      <p className="text-danger">Invalid Voucher</p>
+                    ))}
 
-              {hasAttempt &&
-                (isSuccess ? (
-                  <p className="text-success">
-                    Voucher is Successfully Applied
-                  </p>
-                ) : (
-                  <p className="text-danger">Invalid Voucher</p>
-                ))}
-
-              <div>
-                <label>
-                  <b>Payment Method</b>
-                </label>
-                <select
-                  className="form-control"
-                  value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                >
-                  <option value="">Select Option</option>
-                  <option value="Online">Online</option>
-                  <option value="COD">Cash On Delivery</option>
-                </select>
-                <button
-                  className="btn btn-brown w-100 mt-3 mb-3"
-                  onClick={handleOrder}
-                >
-                  Confirm Order
-                </button>
+                  <div>
+                    <label>
+                      <b>Payment Method</b>
+                    </label>
+                    <select
+                      className="form-control"
+                      value={paymentMethod}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                    >
+                      <option value="">Select Option</option>
+                      <option value="Online">Online</option>
+                      <option value="COD">Cash On Delivery</option>
+                    </select>
+                    <button
+                      className="btn btn-brown w-100 mt-3 mb-3"
+                      onClick={handleOrder}
+                    >
+                      Confirm Order
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </section>
+        </section>
+      ) : (
+        <h1> Loading...</h1>
+      )}
+    </>
   );
 }

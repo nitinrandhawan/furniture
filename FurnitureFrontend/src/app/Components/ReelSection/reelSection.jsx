@@ -5,7 +5,7 @@ import styles from "./ReelSection.module.css"; // CSS Module
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { axiosInstance } from "@/app/utils/axiosInstance";
-import { AddToCartToServer } from "@/app/redux/slice/cartSlice";
+import { addToCart, AddToCartToServer } from "@/app/redux/slice/cartSlice";
 import { useDispatch, useSelector } from "react-redux";
 
 

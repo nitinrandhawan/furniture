@@ -188,7 +188,7 @@ export default function Products() {
                     </div> */}
 
                       {/* <Link href={"/Pages/products/id"}> <button className={`btn btn-sm btn-outline-secondary w-100 ${styles.productViewDetailsButton}`}>View Details</button></Link> */}
-                      <Link href={"/Pages/products/id"}>
+                      <Link href={`/Pages/products/${product._id}`}>
                         {" "}
                         <button
                           className={`cardbtn text-light w-100 ${styles.productViewDetailsButton}`}

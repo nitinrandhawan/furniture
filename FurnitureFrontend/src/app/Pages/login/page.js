@@ -54,7 +54,6 @@ useEffect(()=>{
       dispatch(loadWishlistFromLocalStorage())
     }
 },[])
-console.log("wishlist",wishlist);
 
   return (
     <>
