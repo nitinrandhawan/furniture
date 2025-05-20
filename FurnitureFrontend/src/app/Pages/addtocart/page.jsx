@@ -173,7 +173,7 @@ const Cart = () => {
                     <div className="price-text">
                       ₹{item?.finalPrice * item?.quantity  || item?.productId?.finalPrice * item?.quantity}{" "}
                       <del className="ms-2">₹{item?.price * item?.quantity || item?.productId?.price * item?.quantity}</del>{" "}
-                      <span className="themeColor ms-2">
+                      <span className=" ms-2">
                         {item?.discount || item?.productId?.discount}% OFF
                       </span>
                     </div>
@@ -208,7 +208,7 @@ const Cart = () => {
               </div>
               <div className="d-flex justify-content-between mb-2">
                 <span>Discount</span>
-                <span className="themeColor">- ₹{totals.discount}</span>
+                <span className="">- ₹{totals.discount}</span>
               </div>
               {/* <div className="d-flex justify-content-between mb-2">
                 <span>Coupon (SUMMER25)</span>
@@ -220,7 +220,7 @@ const Cart = () => {
                 <span>₹{totals.total}</span>
               </div>
               <small className="text-muted">Inclusive of all taxes</small>
-              <p className="themeColor small mt-3">
+              <p className=" small mt-3">
                 Congratulations! You’ve Just Saved ₹{totals.discount} On Your
                 Order.
               </p>
