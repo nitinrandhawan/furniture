@@ -1,11 +1,10 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MdClose, MdDelete } from "react-icons/md";
 import Image from "next/image";
-import "./CartSidebar.css";
 import Link from "next/link";
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import {
   decreaseQuantity,
@@ -17,85 +16,77 @@ import {
   updateQuantity,
 } from "@/app/redux/slice/cartSlice";
 import { axiosInstance } from "@/app/utils/axiosInstance";
+import "./CartSidebar.css";
 
-const CartSidebar = ({ isOpen, onClose, cartItems = [], onRemoveItem }) => {
+const CartSidebar = ({ isOpen, onClose }) => {
   const router = useRouter();
-
-  const handleClick = () => {
-    router.push("/Pages/addtocart");
-  };
   const dispatch = useDispatch();
   const { items } = useSelector((state) => state.cart);
-
   const { user, loading } = useSelector((state) => state.auth);
-  const handleDecrease = async (productId, quantity) => {
-    if (quantity === 1) return;
-    if (user && user?.email) {
-      try {
-        await dispatch(
-          updateQuantity({ productId: productId?._id, action: "decrease" })
-        );
+
+  // Fetch or sync cart
+  useEffect(() => {
+    if (!loading) {
+      if (user?.email) {
         dispatch(fetchCartItems());
-      } catch (error) {
-        console.error(error);
+      } else {
+        const cartData = localStorage.getItem("cart");
+        const parsed = safeJSONParse(cartData);
+        if (Array.isArray(parsed)) {
+          dispatch(setCartFromLocalStorage(parsed));
+        }
       }
+    }
+  }, [loading, user?.email]);
+
+  // Disable scroll when cart is open
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
+  const handleDecrease = (productId, quantity) => {
+    if (quantity <= 1) return;
+
+    if (user?.email) {
+      dispatch(updateQuantity({ productId: productId?._id, action: "decrease" }))
+        .then(() => dispatch(fetchCartItems()));
     } else {
       dispatch(decreaseQuantity({ productId }));
     }
   };
 
-  const handleIncreaseQuantity = async (productId, quantity, stock) => {
-    if (quantity === stock) return;
-    if (user && user?.email) {
-      try {
-        await dispatch(
-          updateQuantity({ productId: productId?._id, action: "increase" })
-        );
-        dispatch(fetchCartItems());
-      } catch (error) {
-        console.error(error);
-      }
+  const handleIncrease = (productId, quantity, stock) => {
+    if (quantity >= stock) return;
+
+    if (user?.email) {
+      dispatch(updateQuantity({ productId: productId?._id, action: "increase" }))
+        .then(() => dispatch(fetchCartItems()));
     } else {
       dispatch(increaseQuantity({ productId }));
     }
   };
+
   const handleRemove = async (productId) => {
-    if (user && user?.email) {
+    if (user?.email) {
       try {
-        const response=  await axiosInstance.post("/api/v1/cart/remove-from-cart", { productId: productId?._id });
-     
+        await axiosInstance.post("/api/v1/cart/remove-from-cart", { productId: productId?._id });
         dispatch(removeFromCart({ productId: productId?._id }));
-    
-      } catch (error) {
-        console.log("error", error?.response?.data.message || error.message);
+      } catch (err) {
+        console.error(err?.response?.data.message || err.message);
       }
     } else {
-      dispatch(removeFromCart({ productId: productId }));
+      dispatch(removeFromCart({ productId }));
     }
   };
-  const total = items.reduce((sum, item) => {
-    const price =
-      item?.finalPrice ??
-      item?.productId?.finalPrice ??
-      0; 
-  
-    return sum + price * (item?.quantity || 1);
-  }, 0);
-  useEffect(() => {
-    if (loading) return;
 
-    if (user && user?.email) {
-      dispatch(fetchCartItems());
-    } else {
-      if (typeof window !== "undefined") {
-        const cartData = localStorage.getItem("cart");
-        const parsedCart = safeJSONParse(cartData);
-        if (parsedCart && Array.isArray(parsedCart)) {
-          dispatch(setCartFromLocalStorage(parsedCart));
-        }
-      }
-    }
-  }, [loading]);
+  const total = items.reduce((acc, item) => {
+    const price = item?.finalPrice || item?.productId?.finalPrice || 0;
+    return acc + price * (item.quantity || 1);
+  }, 0);
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -105,128 +96,82 @@ const CartSidebar = ({ isOpen, onClose, cartItems = [], onRemoveItem }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.5 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
           />
-          <motion.div
-            className="cart-sidebar"
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          >
-            <div className="cart-header text-center">
-              <h5>
-                Your cart <span className="text-muted">({items.length})</span>
-              </h5>
-              <MdClose className="close-icon" onClick={onClose} />
-            </div>
 
-            <div className="cart-body">
-              {items.length === 0 ? (
-                <>
-                  <p className="text-muted text-center">Your cart is empty.</p>
-                  <Image
-                    src="/Empty.webp"
-                    alt="Empty Cart"
-                    width={400}
-                    height={400}
-                  />
-                  <b>
-                    What would you like to buy ? Pick From Our Best Selling
-                    Categories
-                  </b>
-                  <p className="space-x-2">
-                    <Link
-                      href="/furniture"
-                      className="hover:underline text-blue-600"
-                    >
-                      Furniture
-                    </Link>
-                    <span>||</span>
-                    <Link
-                      href="/sofas-seating"
-                      className="hover:underline text-blue-600"
-                    >
-                      Sofas & Seating
-                    </Link>
-                    <span>||</span>
-                    <Link
-                      href="/kitchen-dining"
-                      className="hover:underline text-blue-600"
-                    >
-                      Kitchen & Dining
-                    </Link>
-                  </p>
-                </>
-              ) : (
-                items.map((item, index) => (
-                  <div
-                    className="cart-item border-bottom d-flex gap-3 py-3"
-                    key={index}
-                  >
-                    <Image
-                      src={item?.image || item?.productId?.images[0] || "/placeholder.svg"}
-                      width={130}
-                      height={100}
-                      alt={item?.name || item?.productId?.productName || "Product"}
-                      className="rounded"
-                    />
-                    <div className="flex-grow-1">
-                      <p className="fw-semibold mb-2">{item?.name || item?.productId?.productName}</p>
-                      <div className="quantity-box  d-flex align-items-center gap-4 mb-2">
-                        <button
-                          className="btn btn-outline-secondary btn-sm"
-                          onClick={() =>
-                            handleDecrease(item.productId, item.quantity)
-                          }
-                        >
-                          -
-                        </button>
-                        <span>{item?.quantity}</span>
-                        <button
-                          className="btn btn-outline-secondary btn-sm"
-                          onClick={() =>
-                            handleIncreaseQuantity(
-                              item.productId,
-                              item.quantity,
-                              item.stock
-                            )
-                          }
-                        >
-                          +
-                        </button>
-                      </div>
-                      <strong className="themeColor">₹{item?.finalPrice || item?.productId?.finalPrice}</strong>
-                    </div>
-                    <div className="d-grid justify-content-between mb-3">
-                      <MdDelete
-                        className="text-danger mb-2 fs-5 cursor-pointer"
-                        onClick={() => handleRemove(item.productId)}
-                      />
+          {/* 👇 Close cart when cursor moves out */}
+          <div onMouseLeave={onClose}>
+            <motion.div
+              className="cart-sidebar"
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            >
+              <div className="cart-header text-center">
+                <h5>Your cart <span className="text-muted">({items.length})</span></h5>
+                <MdClose className="close-icon" onClick={onClose} />
+              </div>
 
-                      {/* <span>Total</span>
-                      <strong className="themeColor">₹{total}</strong> */}
+              <div className="cart-body">
+                {items.length === 0 ? (
+                  <div className="text-center">
+                    <p className="text-muted">Your cart is empty.</p>
+                    <Image src="/Empty.webp" alt="Empty Cart" width={300} height={300} />
+                    <p className="mt-3 fw-bold">What would you like to buy?</p>
+                    <div className="d-flex flex-wrap gap-2 justify-content-center">
+
+                      <Link href="/Pages/All-category" className="text-primary"><button className="btn btn-secondary w-100">Shop All Products</button></Link>
+                      {/* <Link href="/sofas-seating" className="text-primary">Sofas</Link>
+                      <Link href="/kitchen-dining" className="text-primary">Kitchen</Link> */}
                     </div>
                   </div>
-                ))
-              )}
-            </div>
-
-            {items.length > 0 && (
-              <div className="cart-footer">
-                <div className="d-flex justify-content-between mb-3">
-                  <span>Total</span>
-                  <strong className="themeColor">₹{total}</strong>
-                </div>
-                <button
-                  className="btn btn-success w-100 d-flex justify-content-center align-items-center gap-2"
-                  onClick={handleClick}
-                >
-                  PLACE ORDER
-                </button>
+                ) : (
+                  items.map((item, index) => {
+                    const product = item?.productId || item;
+                    return (
+                      <div className="cart-item d-flex gap-3 py-3 border-bottom" key={index}>
+                        <Image
+                          src={product?.images?.[0] || item?.image || "/placeholder.svg"}
+                          width={130}
+                          height={100}
+                          alt={product?.productName || "Product"}
+                          className="rounded"
+                        />
+                        <div className="flex-grow-1">
+                          <p className="fw-semibold mb-2">{product?.productName || item?.name}</p>
+                          <div className="d-flex align-items-center gap-3 mb-2">
+                            <button className="btn btn-outline-secondary btn-sm" onClick={() => handleDecrease(product, item.quantity)}>-</button>
+                            <span>{item.quantity}</span>
+                            <button className="btn btn-outline-secondary btn-sm" onClick={() => handleIncrease(product, item.quantity, product?.stock)}>+</button>
+                          </div>
+                          <strong>₹{product?.finalPrice || item?.finalPrice}</strong>
+                        </div>
+                        <MdDelete
+                          className="text-danger fs-5 cursor-pointer"
+                          onClick={() => handleRemove(product)}
+                        />
+                      </div>
+                    );
+                  })
+                )}
               </div>
-            )}
-          </motion.div>
+
+              {items.length > 0 && (
+                <div className="cart-footer">
+                  <div className="d-flex justify-content-between mb-3">
+                    <span>Total</span>
+                    <strong>₹{total}</strong>
+                  </div>
+                  <button
+                    className="btn btn-success w-100"
+                    onClick={() => router.push("/Pages/addtocart")}
+                  >
+                    PLACE ORDER
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>

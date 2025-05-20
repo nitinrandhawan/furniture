@@ -22,7 +22,7 @@ const testimonials = [
   },
   {
     name: "Mukesh Singh",
-    role: "Tankpur, Uttrakhand",
+    role: "Tanakpur, Uttrakhand",
     image: "/testimonial4.jpg",
     message: "Finding stylish furniture at a good price was tough until I discovered this site. My bedroom looks like a Pinterest board now!",
   },
