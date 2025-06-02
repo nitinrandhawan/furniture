@@ -46,6 +46,7 @@ import EditSubCategory from "../../Pages/SubCategory/EditSubCategory";
 import AddSubCategory from "../../Pages/SubCategory/AddSubCategory";
 import AllSubCategory from "../../Pages/SubCategory/AllSubCategory";
 import AllFranchise from "../../Pages/Franchise/Franchise";
+import AllEmailInquiry from "../../Pages/EmailInquiry/AllEmailInquiry";
 
 const Home = () => {
   const [login, setLogin] = useState(false);
@@ -134,6 +135,7 @@ const Home = () => {
               <Route path={"edit-videos/:id"} element={<EditVideios />} />
               <Route path={"/all-inquiries"} element={<AllInquiries />} />
               <Route path={"/all-become-franchise"} element={<AllFranchise />} />
+              <Route path={"/all-email-inquiries"} element={<AllEmailInquiry />} />
             </Routes>
           </div>
         </>

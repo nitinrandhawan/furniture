@@ -82,7 +82,7 @@ const AllUsers = () => {
                 users.map((user, index) => (
                   <tr key={user._id}>
                     <th scope="row">{index + 1}</th>
-                    <td>{user.fullName}</td>
+                    <td>{user.name}</td>
                     <td>{user.email}</td>
                     <td>{user.phone}</td>
                     {/* <td>{user.role || "User"}</td> */}

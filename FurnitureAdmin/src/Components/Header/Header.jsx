@@ -43,6 +43,7 @@ const Header = () => {
     { to: "/all-users", label: "All Users", icon: "fa-solid fa-users" },
     { to: "/all-inquiries", label: "All Inquiries", icon: "fa-solid fa-envelope-open-text" },
     { to: "/all-become-franchise", label: "Franchise Requests", icon: "fa-solid fa-handshake" },
+    { to: "/all-email-inquiries", label: "Email Inquiries", icon: "fa-solid fa-envelope" },
     // { to: "/all-wishlist", label: "manage user wishlist", icon: "fa-solid fa-brain" },
     // { to: "/all-rewardPoint", label: "Manage Reward Point", icon: "fa-solid fa-coins" },
     // { to: "/all-videos", label: "Manage Videos", icon: "fa-solid fa-video" },
