@@ -130,6 +130,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
                     const product = item?.productId || item;
                     return (
                       <div className="cart-item d-flex gap-3 py-3 border-bottom" key={index}>
+                        <Link href={`/Pages/products/${item?.productId ? item?.productId : item?._id}`}>
                         <Image
                           src={product?.images?.[0] || item?.image || "/placeholder.svg"}
                           width={130}
@@ -137,6 +138,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
                           alt={product?.productName || "Product"}
                           className="rounded"
                         />
+                        </Link>
                         <div className="flex-grow-1">
                           <p className="fw-semibold mb-2">{product?.productName || item?.name}</p>
                           <div className="d-flex align-items-center gap-3 mb-2">
@@ -144,7 +146,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
                             <span>{item.quantity}</span>
                             <button className="btn btn-outline-secondary btn-sm" onClick={() => handleIncrease(product, item.quantity, product?.stock)}>+</button>
                           </div>
-                          <strong>₹{product?.finalPrice || item?.finalPrice}</strong>
+                          <strong>₹{product?.finalPrice * item.quantity || item?.finalPrice * item.quantity}</strong>
                         </div>
                         <MdDelete
                           className="text-danger fs-5 cursor-pointer"

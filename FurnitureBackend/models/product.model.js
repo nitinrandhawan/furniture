@@ -21,6 +21,7 @@ const productSchema = new mongoose.Schema(
         stock: {
             type: Number,
             required: true,
+           default: Number.MAX_SAFE_INTEGER
         },
         finalPrice: {
             type: Number,

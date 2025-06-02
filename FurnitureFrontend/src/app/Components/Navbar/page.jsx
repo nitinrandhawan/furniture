@@ -368,7 +368,10 @@ const handleSearchChange = (e) => {
                 >
                   <Link
                     className="nav-link"
-                    href={`/Pages/products/${dropdownContent[navItem].link}`}
+                    href={`/Pages/category/${generateSlug(
+                          dropdownContent[navItem].title,
+                          dropdownContent[navItem].link
+                        )}`}
                   >
                     {navItem} <IoIosArrowDown />
                   </Link>

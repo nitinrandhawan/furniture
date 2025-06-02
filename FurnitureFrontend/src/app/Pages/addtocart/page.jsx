@@ -131,7 +131,7 @@ const Cart = () => {
             {items?.map((item,index) => (
               <div key={index} className="cart-item d-flex mb-4 pb-3">
                 <Link
-                  href={`/Pages/products/}`}
+                  href={`/Pages/products/${item?.productId ? item?.productId : item?.productId?._id}`}
                   className="text-decoration-none"
                 >
                 <Image

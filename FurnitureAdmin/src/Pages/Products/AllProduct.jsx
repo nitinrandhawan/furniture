@@ -157,7 +157,7 @@ const AllProduct = () => {
                             <th>Material</th>
                             <th>Weight</th>
                             <th>Price</th>
-                            <th>Stock</th>
+                            {/* <th>Stock</th> */}
                             <th>Discount</th>
                             <th>Final Price</th>
                             {/* <th>Tax</th> */}
@@ -198,7 +198,7 @@ const AllProduct = () => {
                                     <td>{product?.material}</td>
                                     <td>{product?.weight}</td>
                                     <td>{product?.price}</td>
-                                    <td>{product?.stock}</td>
+                                    {/* <td>{product?.stock}</td> */}
                                     <td>{product?.discount}{product?.discount > 100 ? " ₹" : "%"}</td>
                                     <td>{product?.finalPrice?.toFixed(0)}</td>
                                     {/* <td>{product?.Variant?.map((v, i) => <div key={i}>{v?.tax}</div>)}</td> */}

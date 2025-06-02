@@ -38,6 +38,7 @@ import categoryRouter from "./routes/category.route.js";
 import becomeFranchiseRouter from "./routes/BecomeFranchise.route.js";
 import cartRouter from "./routes/cart.route.js";
 import orderRouter from "./routes/order.route.js";
+import emailInqueryRouter from "./routes/emailInquery.route.js";
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/category", categoryRouter);
@@ -51,6 +52,7 @@ app.use("/api/v1/video", videoRouter);
 app.use("/api/v1/wishlist", wishlistRouter);
 app.use("/api/v1/cart", cartRouter);
 app.use("/api/v1/order", orderRouter);
+app.use("/api/email-inquery", emailInqueryRouter);
 
 app.get("/", (req, res) => {
   res.send("Server is running");

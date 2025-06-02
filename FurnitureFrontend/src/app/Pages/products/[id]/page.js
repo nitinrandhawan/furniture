@@ -19,7 +19,7 @@ import toast from "react-hot-toast";
 import { axiosInstance } from "@/app/utils/axiosInstance";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart, AddToCartToServer } from "@/app/redux/slice/cartSlice";
-import { extractIdFromSlug } from "@/app/utils/generate-slug";
+import { extractIdFromSlug, generateSlug } from "@/app/utils/generate-slug";
 
 
 // import image1 from "../../../Components/assets/about2.png"
@@ -238,7 +238,10 @@ if(loading) return <ProductDetailsSkeleton/>
               <Link href="/"><span className="breadcrumb-link">Home</span></Link>
             </li>
             <li className="breadcrumb-item">
-              <Link href="/Pages/products"><span className="breadcrumb-link">Products</span></Link>
+              <Link href={`/Pages/category/${generateSlug(product?.category?.categoryName, product?.category?._id)}`}><span className="breadcrumb-link">{product?.category?.categoryName}</span></Link>
+            </li>
+            <li className="breadcrumb-item">
+              <Link href={`/Pages/products/subcategory/${generateSlug(product?.subCategory?.subCategoryName, product?.subCategory?._id)}`}><span className="breadcrumb-link">{product?.subCategory?.subCategoryName}</span></Link>
             </li>
             <li className="breadcrumb-item active" aria-current="page">Product Details</li>
           </ol>
@@ -264,7 +267,7 @@ if(loading) return <ProductDetailsSkeleton/>
                  
                   <div className='price-section'>
                     <p className='final-price'> ₹{product?.finalPrice}</p>
-                    <p className='price'><del>MRP ₹{product?.price}</del></p>
+                    <p className='price'><del> ₹{product?.price}</del></p>
                     <p className='discount'>{product?.discount}% OFF</p>
                   </div>
                   <div className='product-overview'>
@@ -290,14 +293,14 @@ if(loading) return <ProductDetailsSkeleton/>
                        <li>
                          <strong>Brand :</strong> {product?.brand}
                        </li>
-                       <li>
+                       {/* <li>
                          <strong>SKU :</strong>
                          {product?.sku}
-                       </li>
-                       <li>
+                       </li> */}
+                       {/* <li>
                          <strong>Stock :</strong>
                          {product?.stock === 0 ? "Out of Stock" : product?.stock}
-                       </li>
+                       </li> */}
                      </ul>
                       <div className="product-details-cart-button">
                        {" "}

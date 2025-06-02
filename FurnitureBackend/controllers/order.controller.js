@@ -224,6 +224,7 @@ const UpdateCheckout = async (req, res) => {
     const { id } = req.params;
     const { orderStatus, paymentStatus } = req.body || {};
     const checkout = await Checkout.findById(id);
+   
     checkout.paymentStatus = paymentStatus ?? checkout.paymentStatus;
     checkout.orderStatus = orderStatus ?? checkout.orderStatus;
     await checkout.save();

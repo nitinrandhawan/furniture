@@ -16,7 +16,7 @@ const EditProduct = () => {
     images: [],
     price: 0,
     discount: 0,
-    stock: 0,
+    // stock: 0,
     finalPrice: 0,
     brand: "",
     description: "",
@@ -63,7 +63,7 @@ const EditProduct = () => {
           productName: data.productName,
           images: [],
           price: data.price,
-          stock: data.stock,
+          // stock: data.stock,
           finalPrice: data.finalPrice,
           discount: data.discount,
           brand: data.brand,
@@ -402,7 +402,7 @@ const EditProduct = () => {
               />
             </div>
 
-            <div className="col-md-2">
+            {/* <div className="col-md-2">
               <label className="form-label">Stock</label>
               <input
                 type="text"
@@ -411,7 +411,7 @@ const EditProduct = () => {
                 value={formData.stock}
                 onChange={handleChange}
               />
-            </div>
+            </div> */}
           </div>
           <div className="row" style={{ marginTop: "20px" }}>
             <div className="col-md-3">

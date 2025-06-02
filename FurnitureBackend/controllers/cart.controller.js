@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
-import Cart  from "../models/cart.model.js";
+import Cart from "../models/cart.model.js";
 import Product from "../models/product.model.js";
-import User  from "../models/user.model.js";
+import User from "../models/user.model.js";
 
 const AddToCart = async (req, res) => {
   try {
@@ -51,12 +51,9 @@ const AddToCart = async (req, res) => {
         const newQuantity = existingItem.quantity + quantity;
 
         if (newQuantity > product.stock) {
-   
-          return res
-            .status(400)
-            .json({
-              message: `Only ${product.stock} units available for ${product.productName}`,
-            });
+          return res.status(400).json({
+            message: `Only ${product.stock} units available for ${product.productName}`,
+          });
         }
 
         cart.items[existingItemIndex].quantity = newQuantity;
@@ -64,11 +61,9 @@ const AddToCart = async (req, res) => {
           quantity * (product.price * (1 - product.discount / 100));
       } else {
         if (quantity > product.stock) {
-          return res
-            .status(400)
-            .json({
-              message: `Only ${product.stock} units available for ${product.productName}`,
-            });
+          return res.status(400).json({
+            message: `Only ${product.stock} units available for ${product.productName}`,
+          });
         }
 
         cart.items.push({ productId, quantity });
@@ -78,22 +73,25 @@ const AddToCart = async (req, res) => {
     }
 
     cart.totalAmount = totalAmount;
- const updatedCart =   await cart.save();
+    const updatedCart = await cart.save();
 
-    return res.status(200).json({ message: "Cart updated successfully",updatedCart });
+    return res
+      .status(200)
+      .json({ message: "Cart updated successfully", updatedCart });
   } catch (error) {
     console.error("Error in AddToCart:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
- const UpdateCartQuantity = async (req, res) => {
+const UpdateCartQuantity = async (req, res) => {
   try {
     const { _id: userId } = req.user;
     const { productId, action } = req.body || {};
     if (!action) {
       return res.status(400).json({ message: "action is required" });
     }
+
     if (
       !mongoose.Types.ObjectId.isValid(userId) ||
       !mongoose.Types.ObjectId.isValid(productId)
@@ -124,11 +122,9 @@ const AddToCart = async (req, res) => {
 
     if (action === "increase") {
       if (item.quantity + 1 > product.stock) {
-        return res
-          .status(400)
-          .json({
-            message: `Cannot exceed stock. Available: ${product.stock}`,
-          });
+        return res.status(400).json({
+          message: `Cannot exceed stock. Available: ${product.stock}`,
+        });
       }
       item.quantity += 1;
     } else if (action === "decrease") {
@@ -171,7 +167,7 @@ const RemoveFromCart = async (req, res) => {
   try {
     const { _id: userId } = req?.user;
     const { productId } = req.body || {};
-    
+
     if (!userId || !productId) {
       return res
         .status(400)
@@ -184,8 +180,8 @@ const RemoveFromCart = async (req, res) => {
     const removedItem = cart.items.find(
       (item) => item.productId.toString() === productId
     );
- 
-    if(!removedItem){
+
+    if (!removedItem) {
       return res.status(404).json({ message: "Product not found in cart" });
     }
 
@@ -201,10 +197,10 @@ const RemoveFromCart = async (req, res) => {
       (item) => !(item.productId.toString() === productId)
     );
 
- const updatedCart =   await cart.save();
+    const updatedCart = await cart.save();
     return res
       .status(200)
-      .json({ message: "Product removed from cart successfully", updatedCart});
+      .json({ message: "Product removed from cart successfully", updatedCart });
   } catch (error) {
     console.error("Error in RemoveFromCart:", error);
     res.status(500).json({ message: "Internal server error" });

@@ -7,7 +7,7 @@ const createProduct = async (req, res) => {
       productName,
       price,
       discount,
-      stock,
+      // stock,
       brand,
       description,
       material,
@@ -29,7 +29,7 @@ const createProduct = async (req, res) => {
       !productName ||
       !price ||
       !discount ||
-      !stock ||
+      // !stock ||
       !brand ||
       !description ||
       !isFeatured ||
@@ -66,7 +66,7 @@ const createProduct = async (req, res) => {
       images,
       price,
       discount,
-      stock,
+      // stock,
       finalPrice,
       brand,
       description,
@@ -194,7 +194,7 @@ const getSingleProduct = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const product = await Product.findById(id).populate("subCategory");
+    const product = await Product.findById(id).populate("subCategory").populate("category");
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
