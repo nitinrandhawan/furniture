@@ -7,6 +7,11 @@ import toast from "react-hot-toast";
 import { axiosInstance } from "@/app/utils/axiosInstance";
 import { addToCart, AddToCartToServer } from "@/app/redux/slice/cartSlice";
 import { useDispatch, useSelector } from "react-redux";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 
 
 
@@ -147,69 +152,80 @@ const handleAddToCart=(e,product)=>{
 }, []);
   return (
     <section className="reel-section mt-3" ref={containerRef}>
-      <div className="container">
-        <div className="row g-3">
-          {videoData.map((item, index) => (
+  <div className="container">
+    <Swiper className="pt-3 pb-5"
+      modules={[Navigation, Pagination]}
+      spaceBetween={15}
+      pagination={{ clickable: true }}
+      // pagination={false}
+      breakpoints={{
+        320: { slidesPerView: 2 },
+        576: { slidesPerView: 3 },
+        768: { slidesPerView: 4 },
+        992: { slidesPerView: 5 },
+        1200: { slidesPerView: 6 },
+      }}
+    >
+      {videoData.map((item, index) => (
+        <SwiperSlide key={index}>
+          <div
+            className="d-flex flex-column align-items-center position-relative"
+            onClick={() => toggleExpand(index)}
+          >
             <div
-              key={index}
-              className={`col-md-2 col-sm-4 col-6 d-flex flex-column align-items-center position-relative`}
-              onClick={() => toggleExpand(index)}
+              onMouseEnter={() => handleMouseEnter(index)}
+              onMouseLeave={handleMouseLeave}
+              className={`${styles.videoContainer} ${
+                expandedIndex === index ? styles.expanded : ""
+              } ${
+                expandedIndex !== null && expandedIndex !== index
+                  ? styles.shrunken
+                  : ""
+              }`}
             >
+              <video
+                ref={(el) => (videoRefs.current[index] = el)}
+                src={item?.videoUrl}
+                muted
+                loop
+                playsInline
+                className={`${styles.videoElement} rounded shadow-sm`}
+              />
               <div
-                onMouseEnter={() => handleMouseEnter(index)}
-                onMouseLeave={handleMouseLeave}
-                className={`${styles.videoContainer} ${
-                  expandedIndex === index ? styles.expanded : ""
-                } ${
-                  expandedIndex !== null && expandedIndex !== index
-                    ? styles.shrunken
-                    : ""
-                }`}
+                className={`position-absolute bottom-0 start-0 w-100 p-2 bg-dark d-flex bg-opacity-75 text-white justify-content-center rounded-bottom ${styles.overlay}`}
               >
-                <video
-                  ref={(el) => (videoRefs.current[index] = el)}
-                  src={item?.videoUrl}
-                  muted
-                  loop
-                  playsInline
-                  className={`${styles.videoElement} rounded shadow-sm`}
-                />
-                <div
-                  className={`position-absolute bottom-0 start-0 w-100 p-2 bg-dark d-flex bg-opacity-75 text-white justify-content-center rounded-bottom ${styles.overlay}`}
-                >
-                  <div className="ms-2 d-grid">
-                    <p className="small mb-1">{item?.productId?.productName}</p>
-                    <p className="fw-bold mb-1">₹{item?.productId?.finalPrice}</p>
-                    <div className="d-flex align-items-center">
-                     
-                        <button
-                          className="btn btn-sm"
-                          style={{
-                            background: "var(--brown)",
-                            color: "white",
-                          }}
-                          onClick={ (e)=>handleAddToCart(e,item?.productId)}
-                         
-                        >
-                          Add to Cart
-                        </button>
-                     
-                      <i
-                        className={`fa fa-eye  ms-3 ${styles.cursorPointer}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleExpand(index);
-                        }}
-                      ></i>
-                    </div>
+                <div className="ms-2 d-grid">
+                  <p className="small mb-1">{item?.productId?.productName}</p>
+                  <p className="fw-bold mb-1">₹{item?.productId?.finalPrice}</p>
+                  <div className="d-flex align-items-center">
+                    <button
+                      className="btn btn-sm"
+                      style={{ background: "var(--brown)", color: "white" }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddToCart(e, item?.productId);
+                      }}
+                    >
+                      Add to Cart
+                    </button>
+                    <i
+                      className={`fa fa-eye ms-3 ${styles.cursorPointer}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleExpand(index);
+                      }}
+                    ></i>
                   </div>
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-      </div>
-    </section>
+          </div>
+        </SwiperSlide>
+      ))}
+    </Swiper>
+  </div>
+</section>
+
   );
 }
 
