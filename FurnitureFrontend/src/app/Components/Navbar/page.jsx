@@ -254,10 +254,11 @@ const handleSearchChange = (e) => {
               </span>
             </div>
             <div className="right d-flex text-dark align-items-center gap-3 flex-wrap">
+              <Link href={"tel:+91 9250 027 213"}>
               <span>
-                <FaPhoneAlt className="fs-5 helpline" /> 011-46520774
+                <FaPhoneAlt className="fs-5 helpline" />  +91 9250 027 213
               </span>
-
+</Link>
               <Link className="nav-link" href="/Pages/franchise">
                 Become a Franchise
               </Link>

@@ -97,7 +97,7 @@ const Footer = () => {
     <input
       type="email"
       onChange={(e) => setEmail(e.target.value)}
-      placeholder="Enter your email"
+      placeholder="Enter Email or phone"
       className="contactInput"
     />
     <button className="contactButton" onClick={handleContactUs}>Contact Us</button>
