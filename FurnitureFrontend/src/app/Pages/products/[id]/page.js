@@ -88,7 +88,7 @@ const imageArray = product?.images || [];
       <Slider {...mainSettings}>
         {imageArray.map((img, i) => (
           <div key={i}>
-            <img
+            <Image
               src={img}
               className="img-fluid"
               style={{ height: "500px", objectFit: "cover", borderRadius: "10px", width: "100%" }}
@@ -103,7 +103,7 @@ const imageArray = product?.images || [];
           <Slider {...thumbSettings}>
             {imageArray.map((img, i) => (
               <div key={i}>
-                <img
+                <Image
                   src={img}
                   className="img-fluid"
                   style={{ padding: 5, height: 100, objectFit: "cover", borderRadius: "5px", width: "100%" }}

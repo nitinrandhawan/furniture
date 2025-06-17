@@ -111,7 +111,7 @@ const Page = () => {
     }
     if (!categories.length) dispatch(fetchCategories());
     if (!materials.length) dispatch(fetchMaterials());
-  }, []);
+  }, [dispatch]);
   return (
     <>
       {/* Product filter section */}

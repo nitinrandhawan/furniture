@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchCategories } from "@/app/redux/slice/categorySllice";
 import { generateSlug } from "@/app/utils/generate-slug";
 
-const page = () => {
+const AllCategory = () => {
   const dispatch = useDispatch();
   const { categories } = useSelector((state) => state.category);
 
@@ -84,4 +84,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default AllCategory;

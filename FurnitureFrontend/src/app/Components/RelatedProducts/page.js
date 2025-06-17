@@ -82,7 +82,7 @@ const Page = ({ products }) => {
     }else{
       dispatch(loadWishlistFromLocalStorage());
     }
-  }, []);
+  }, [dispatch,user]);
   return (
     <>
       {/* Product filter section */}
