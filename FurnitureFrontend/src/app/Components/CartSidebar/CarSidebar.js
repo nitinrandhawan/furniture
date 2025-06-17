@@ -37,7 +37,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
         }
       }
     }
-  }, [loading, user?.email]);
+  }, [loading, user?.email,dispatch]);
 
   // Disable scroll when cart is open
   useEffect(() => {

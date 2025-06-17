@@ -10,7 +10,7 @@ import { useParams } from "next/navigation";
 import { extractIdFromSlug, generateSlug } from "@/app/utils/generate-slug";
 import { NoItem } from "@/app/utils/NoItem";
 
-const page = () => {
+const Page = () => {
 const [subcategories, setSubcategories] = useState([]);
 const [products, setProducts] = useState([]);
 const {id}=useParams();
@@ -98,4 +98,4 @@ useEffect(() => {
   );
 };
 
-export default page;
+export default Page;

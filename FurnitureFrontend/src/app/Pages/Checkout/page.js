@@ -217,7 +217,7 @@ export default function Checkout() {
         }
       }
     }
-  }, [loading]);
+  }, [loading,dispatch,user]);
 
   useEffect(() => {
     fetchCoupons();
@@ -234,9 +234,9 @@ export default function Checkout() {
     }
   }, [user, loading, router]);
 
- if (loading || !user || !user.email) {
-  return <h1>Loading...</h1>;
-}
+  if (loading || !user || !user.email) {
+    return <h1>Loading...</h1>;
+  }
   return (
     <>
       {!loading ? (

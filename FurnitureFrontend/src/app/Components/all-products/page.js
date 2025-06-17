@@ -28,8 +28,8 @@ const Page = () => {
   const dispatch = useDispatch();
   const products = useSelector((state) => state.product.products);
   const categories = useSelector((state) => state.category.categories);
-    const materials = useSelector((state) => state.product.materials);
-      const handleSortChange = (e) => {
+  const materials = useSelector((state) => state.product.materials);
+  const handleSortChange = (e) => {
     const sortValue = e.target.value;
     router.push(`/Pages/products/search?sortBy=${sortValue}`);
   };
@@ -65,7 +65,7 @@ const Page = () => {
       }
     }
   };
-const priceRanges = [
+  const priceRanges = [
     { label: "Under ₹500", priceMin: 0, priceMax: 500 },
     { label: "₹500 - ₹1,000", priceMin: 500, priceMax: 1000 },
     { label: "₹1,000 - ₹2,000", priceMin: 1000, priceMax: 2000 },
@@ -75,14 +75,14 @@ const priceRanges = [
   ];
   useEffect(() => {
     dispatch(fetchProducts());
-      dispatch(fetchCategories());
-        dispatch(fetchMaterials());
+    dispatch(fetchCategories());
+    dispatch(fetchMaterials());
     if (user && user?.email) {
       dispatch(getWishlistFromServer());
     } else {
       dispatch(loadWishlistFromLocalStorage());
     }
-  }, []);
+  }, [dispatch, user]);
 
   return (
     <>
@@ -102,7 +102,7 @@ const priceRanges = [
                     Price
                   </button>
                   <ul className="dropdown-menu">
-                     {priceRanges?.map((priceRange, index) => {
+                    {priceRanges?.map((priceRange, index) => {
                       return (
                         <li key={index}>
                           <Link
@@ -125,7 +125,7 @@ const priceRanges = [
                     Category
                   </button>
                   <ul className="dropdown-menu">
-                     {categories?.slice(0, 10)?.map((category, index) => {
+                    {categories?.slice(0, 10)?.map((category, index) => {
                       return (
                         <li key={index}>
                           <Link
@@ -182,7 +182,7 @@ const priceRanges = [
                   >
                     Discount
                   </button>
-                   <ul className="dropdown-menu">
+                  <ul className="dropdown-menu">
                     <li>
                       <Link
                         href="/Pages/products/search?discountMin=10"
@@ -212,7 +212,7 @@ const priceRanges = [
               </div>
             </div>
             <div className="col-md-4">
-               <div className="filter-second">
+              <div className="filter-second">
                 <strong className="text-white">Sort By</strong>
                 <select
                   className="form-select form-select-sm w-auto"
@@ -243,14 +243,20 @@ const priceRanges = [
                     className="product-card"
                     style={{ position: "relative" }}
                   >
-                    <Link href={`/Pages/products/${generateSlug(item?.productName,item?._id)}`} className="product-link">
-                    <Image
-                      className="product-image"
-                      src={item?.images[0] || "/images/placeholder.png"}
-                      alt="product-image"
-                      width={300}
-                      height={300}
-                    />
+                    <Link
+                      href={`/Pages/products/${generateSlug(
+                        item?.productName,
+                        item?._id
+                      )}`}
+                      className="product-link"
+                    >
+                      <Image
+                        className="product-image"
+                        src={item?.images[0] || "/images/placeholder.png"}
+                        alt="product-image"
+                        width={300}
+                        height={300}
+                      />
                     </Link>
                     <div className="product-details">
                       <h3>{item.productName}</h3>
@@ -266,7 +272,7 @@ const priceRanges = [
                     {/* Wishlist Button */}
                     <button
                       className="wishlist-btn"
-                       onClick={(e) => {
+                      onClick={(e) => {
                         e.stopPropagation();
                         handleWishlist(item?._id, item);
                       }}

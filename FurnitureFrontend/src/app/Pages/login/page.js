@@ -53,7 +53,7 @@ useEffect(()=>{
       }
       dispatch(loadWishlistFromLocalStorage())
     }
-},[])
+},[dispatch])
 
   return (
     <>

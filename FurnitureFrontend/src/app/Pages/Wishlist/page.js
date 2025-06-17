@@ -40,7 +40,7 @@ const Page = () => {
     } else {
       dispatch(loadWishlistFromLocalStorage());
     }
-  }, []);
+  }, [dispatch,user]);
   return (
     <>
       <nav aria-label="breadcrumb" className="pretty-breadcrumb">
